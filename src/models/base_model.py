@@ -13,7 +13,7 @@ class Model(abc.ABC):
   и обеспечивает единый интерфейс для работы с различными моделями.
   """
 
-  def __init__(self):
+  def __init__(self, **kwargs):
     pass
 
   @property
@@ -35,11 +35,12 @@ class Model(abc.ABC):
     """Обновляет внутреннее состояние реккурентной Модели"""
 
 class ModelIO(abc.ABC):
-  """Абстрактный класс, сохраняющий и загружающий модель и ее конфигурацию"""
-  def __init__(self, config):
+  def __init__(self, config: dict, **kwargs):
+    super().__init__(**kwargs)
     self._config = config
+    self.path = config.get("save_path","")
 
-  @abc.abstractmethod
+  @property
   def config(self) -> dict:
     """Возвращает конфигурацию алгоритма"""
     return self._config
@@ -49,21 +50,28 @@ class ModelIO(abc.ABC):
     """Сохраняет модель в директории"""
 
   @abc.abstractmethod
-  def load(self) -> None
+  def load(self) -> None:
     """Загружает модель из директории"""
 
 class ModelNN(abc.ABC):
   """Абстрактрный класс, представляющий модель нейронной сети для вычисления градиента,
    обновления весов и извлечения слоев, весов, компиляции модели.
+
+   Kwargs:
+    model: tf.keras.Model
+    name: str Необязательно, название модели   
   """
 
-  def __init__(self, model: tf.keras.Model):
+  def __init__(self, model: tf.keras.Model, **kwargs):
+    super().__init__(**kwargs)
     self.model = model
+    self.name = kwargs.get('name', 'None')
+    self.validate_args()
   
   def __call__(self, inputs: tf.Tensor) -> tf.Tensor:
     return self.model
   
-  @abs.abstractmethod
+  @abc.abstractmethod
   def _prediction_processing(self, inputs: tf.Tensor, mask: tf.Tensor) -> tf.Tensor:
     """Обрабатывает выходы модели перед вычислением лоссов
     Args:
@@ -72,6 +80,7 @@ class ModelNN(abc.ABC):
     Returns
       outputs: tf.Tensor(dtype=tf.float32
     """
+    return inputs
 
   def prediction_processing(self, inputs: tf.Tensor, mask: tf.Tensor) -> tf.Tensor:
     """Обрабатывает выходы модели перед вычислением лоссов
@@ -83,11 +92,14 @@ class ModelNN(abc.ABC):
     """
     inputs = inputs[0] if isinstance(inputs, list) else inputs
     if inputs.shape != len(mask.shape): mask = tf.expand_dims(mask, -1)
-    return inputs
+    return self._prediction_processing(inputs)
 
   def set_new_model(self, model: tf.keras.Model, optimizer: tf.keras.optimizers, jit_compile=True) -> None:
     self.model = model
     self.model.compile(optimizer=optimizer, jit_compile=jit_compile)
+
+  def validate_args(self):
+      assert isinstance(self.model, tf.keras.Model), "Передан неверный аргумент, должно быть tf.keras.Model"
 
   @property
   def layers(self, ) -> list:
@@ -97,6 +109,11 @@ class ModelNN(abc.ABC):
   def weights(self, ) -> list:
       return self.model.weights
   
+  @property
+  def summary(self, ) -> None:
+      print(self.name)
+      self.model.summary()
+
   def get_weights(self, ) -> list:
       return self.model.get_weights()
 
