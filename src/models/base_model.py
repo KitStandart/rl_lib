@@ -1,3 +1,5 @@
+from rl_lib.src.data_saver.data_saver import Saver
+
 import abc
 import tensorflow as tf
 
@@ -53,7 +55,7 @@ class ModelIO(abc.ABC):
   def load(self) -> None:
     """Загружает модель из директории"""
 
-class ModelNN(abc.ABC):
+class ModelNN(Saver, abc.ABC):
   """Абстрактрный класс, представляющий модель нейронной сети для вычисления градиента,
    обновления весов и извлечения слоев, весов, компиляции модели.
 
@@ -67,6 +69,7 @@ class ModelNN(abc.ABC):
     self.model = model
     self.name = kwargs.get('name', 'None')
     self.validate_args()
+    # self.saver = Saver(**kwargs)
   
   def __call__(self, inputs: tf.Tensor) -> tf.Tensor:
     return self.model
