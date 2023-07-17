@@ -38,14 +38,14 @@ class ModelIO(abc.ABC):
     self._config = config
 
   @abc.abstractmethod
-  def config(self):
+  def config(self) -> dict:
     """Возвращает конфигурацию алгоритма"""
-    return
+    return self._config
 
   @abc.abstractmethod
-  def save(self):
+  def save(self) -> None:
     """Сохраняет модель в директории"""
 
   @abc.abstractmethod
-  def load(self):
+  def load(self) -> None:
     """Загружает модель из директории"""
