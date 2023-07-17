@@ -1,6 +1,3 @@
-from rl_lib.src.models import ModelNN, ModelIO, Model
-from rl_lib.src.algoritms.base_algo import Base_Algo
-
 from tensorflow.keras import layers
 
 class DQN_Model(ModelNN, ModelIO, Model):
@@ -36,18 +33,24 @@ class DQN_Algo(DQN_Model, Base_Algo):
     self.action_model = DQN_Model(model = model, config = config, name = "DQN_action" + config.get("name", ""))
     self.target_model = DQN_Model(model = model, config = config, name = "DQN_target" + config.get("name", ""))
   
-  def initial_model(self):
-    if len(self._config["input_shape"]) <= 2:
-        self.create_model(self._config["input_shape"], self._config["action_space"])
+  def _initial_model(self):
+    if len(self._config["input_shape"]) <= 1:
+        return self.create_model(self._config["input_shape"], self._config["action_space"])
     else:
-      self.create_model_with_conv(self._config["input_shape"], self._config["action_space"])
+      return self.create_model_with_conv(self._config["input_shape"], self._config["action_space"])
   
+  def initial_model(self):
+      model = self._initial_model()
+      self.action_model.set_new_model(model, tf.keras.optimizers.Adam())
+      self.target_model.set_new_model(model, tf.keras.optimizers.Adam())
+      self.target_model.set_weights(self.action_model.get_weights())
+
   @staticmethod
   def create_model(input_shape: tuple, action_space: int) -> tf.keras.Model:
     """Создает модель tf.keras.Model, архитектура DQN"""
     input_layer = layers.Input(shape=input_shape, )
-    dence_layer1 = layers.Dense(256, activation=None)(input_layer)
-    dence_layer2 = layers.Dense(256, activation=None)(dence_layer1)
+    dence_layer1 = layers.Dense(256, activation='relu')(input_layer)
+    dence_layer2 = layers.Dense(256, activation='relu')(dence_layer1)
     dence_out = layers.Dense(action_space, activation=None)(dence_layer2)
     
     return tf.keras.Model(inputs=input_layer, outputs=dence_out)
@@ -61,8 +64,8 @@ class DQN_Algo(DQN_Model, Base_Algo):
     cov_layer3 = layers.Conv1D(64, 3, activation='relu')(cov_layer2)
     conv_out = layers.Flatten()(cov_layer3)
 
-    dence_layer1 = layers.Dense(256, activation=None)(conv_out)
-    dence_layer2 = layers.Dense(256, activation=None)(dence_layer1)
+    dence_layer1 = layers.Dense(256, activation='relu')(conv_out)
+    dence_layer2 = layers.Dense(256, activation='relu')(dence_layer1)
     dence_out = layers.Dense(action_space, activation=None)(dence_layer2)
     
     return tf.keras.Model(inputs=input_layer, outputs=dence_out)
