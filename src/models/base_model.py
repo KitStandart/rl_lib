@@ -36,11 +36,10 @@ class Model(abc.ABC):
   def _update_next_state(self) -> None:
     """Обновляет внутреннее состояние реккурентной Модели"""
 
-class ModelIO(abc.ABC):
+class ModelIO(Saver, abc.ABC):
   def __init__(self, config: dict, **kwargs):
     super().__init__(**kwargs)
     self._config = config
-    self.path = config.get("save_path","")
 
   @property
   def config(self) -> dict:
@@ -55,7 +54,7 @@ class ModelIO(abc.ABC):
   def load(self) -> None:
     """Загружает модель из директории"""
 
-class ModelNN(Saver, abc.ABC):
+class ModelNN(abc.ABC):
   """Абстрактрный класс, представляющий модель нейронной сети для вычисления градиента,
    обновления весов и извлечения слоев, весов, компиляции модели.
 
@@ -69,10 +68,9 @@ class ModelNN(Saver, abc.ABC):
     self.model = model
     self.name = kwargs.get('name', 'None')
     self.validate_args()
-    # self.saver = Saver(**kwargs)
   
   def __call__(self, inputs: tf.Tensor) -> tf.Tensor:
-    return self.model
+    return self.model(inputs)
   
   @abc.abstractmethod
   def _prediction_processing(self, inputs: tf.Tensor, mask: tf.Tensor) -> tf.Tensor:
