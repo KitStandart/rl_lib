@@ -1,4 +1,5 @@
 import abc
+import tensorflow as tf
 
 
 class Model(abc.ABC):
@@ -34,6 +35,7 @@ class Model(abc.ABC):
     """Обновляет внутреннее состояние реккурентной Модели"""
 
 class ModelIO(abc.ABC):
+  """Абстрактный класс, сохраняющий и загружающий модель и ее конфигурацию"""
   def __init__(self, config):
     self._config = config
 
@@ -47,5 +49,96 @@ class ModelIO(abc.ABC):
     """Сохраняет модель в директории"""
 
   @abc.abstractmethod
-  def load(self) -> None:
+  def load(self) -> None
     """Загружает модель из директории"""
+
+class ModelNN(abc.ABC):
+  """Абстрактрный класс, представляющий модель нейронной сети для вычисления градиента,
+   обновления весов и извлечения слоев, весов, компиляции модели.
+  """
+
+  def __init__(self, model: tf.keras.Model):
+    self.model = model
+  
+  def __call__(self, inputs: tf.Tensor) -> tf.Tensor:
+    return self.model
+  
+  @abs.abstractmethod
+  def _prediction_processing(self, inputs: tf.Tensor, mask: tf.Tensor) -> tf.Tensor:
+    """Обрабатывает выходы модели перед вычислением лоссов
+    Args:
+      inputs: tf.Tensor(dtype=tf.float32)
+      mask: tf.Tensor(dtype=tf.float32)
+    Returns
+      outputs: tf.Tensor(dtype=tf.float32
+    """
+
+  def prediction_processing(self, inputs: tf.Tensor, mask: tf.Tensor) -> tf.Tensor:
+    """Обрабатывает выходы модели перед вычислением лоссов
+    Args:
+      inputs: tf.Tensor(dtype=tf.float32)
+      mask: tf.Tensor(dtype=tf.float32)
+    Returns
+      outputs: tf.Tensor(dtype=tf.float32
+    """
+    inputs = inputs[0] if isinstance(inputs, list) else inputs
+    if inputs.shape != len(mask.shape): mask = tf.expand_dims(mask, -1)
+    return inputs
+
+  def set_new_model(self, model: tf.keras.Model, optimizer: tf.keras.optimizers, jit_compile=True) -> None:
+    self.model = model
+    self.model.compile(optimizer=optimizer, jit_compile=jit_compile)
+
+  @property
+  def layers(self, ) -> list:
+      return self.model.layers
+
+  @property
+  def weights(self, ) -> list:
+      return self.model.weights
+  
+  def get_weights(self, ) -> list:
+      return self.model.get_weights()
+
+  def set_weights(self, weights: list) -> None:
+      self.model.set_weights(weights)
+
+  @tf.function(reduce_retracing=True,
+                 jit_compile=False,
+                 experimental_autograph_options = tf.autograph.experimental.Feature.ALL)
+  def calculate_gradients(self, **kwargs):
+      """
+      Вычисляет градиенты, лосс, td-ошибку
+
+      Kwargs:
+          dict содержащий батч, таргет, маску, опционально приоритетные веса
+
+      Returns: 
+          dict содержащий лоссы и td-ошибку
+      """
+      with tf.GradientTape(persistent=False) as tape:
+          Q = self.model(kwargs['state'], training=True)
+          Q = self.prediction_processing(Q, kwargs['mask'])
+          if Q.shape != len(kwargs['Qtarget'].shape): Q = tf.expand_dims(Q, -1)
+
+          td_error = kwargs['Qtarget'] - Q
+          loss = self.loss(kwargs['Qtarget'], Q)*kwargs.get('weights', 1.0)
+      gradients = tape.gradient(loss, self.model.trainable_variables)
+      return {'gradients': gradients, 'loss': loss, 'td_error': td_error}
+
+  @tf.function(reduce_retracing=True,
+                 jit_compile=False,
+                 experimental_autograph_options = tf.autograph.experimental.Feature.ALL)
+  def update_weights(self, **kwargs):
+      """
+      Выполняет шаг отимизатора
+
+      Kwargs:
+          dict содержащий батч, таргет, маску, опционально приоритетные веса
+
+      Returns: 
+          dict содержащий лоссы и td-ошибку
+      """
+      gradients, loss, td_error = self.calculate_gradients(**kwargs).values()
+      self.model.optimizer.apply_gradients(zip(gradients, self.model.trainable_variables))
+      return {'loss': loss, 'td_error': td_error}
