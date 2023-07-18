@@ -1,6 +1,6 @@
 import numpy as np
 from ..data_saver.utils import save_data, load_data
-from .random_buffer import Random_Buffer, Random_Recurrent_Buffer
+from .random_buffers import Random_Buffer, Random_Recurrent_Buffer
 
 class Sum_Tree:
     def __init__(self, size):
