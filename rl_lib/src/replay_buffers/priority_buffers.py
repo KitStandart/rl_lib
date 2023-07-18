@@ -106,6 +106,7 @@ class Prioritized_Replay_Buffer(Random_Buffer):
 
     def save(self, path):
         Random_Buffer.save(self, path)
+        path += self.name
         save_data(path, {
                 'tree': self.tree.tree,
                 'tree_count': self.tree.count, 
@@ -113,7 +114,8 @@ class Prioritized_Replay_Buffer(Random_Buffer):
                     })
 
     def load(self, path):
-        Random_Buffer.load(self, path)        
+        Random_Buffer.load(self, path)     
+        path += self.name
         data = load_data(path)
         self.tree.tree = data['tree']
         self.tree.count = data['tree_count']
