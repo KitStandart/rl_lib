@@ -1,5 +1,5 @@
 import numpy as np
-from saving_data.utils import save_data, load_data
+from data_saver.utils import save_data, load_data
 
 class _n_step_buffer:
     def __init__(self, **kwargs):
@@ -39,11 +39,11 @@ class _n_step_buffer:
 
 
 class Random_Buffer:
-    '''
-    Сохраняет переходы (s,a,r,d,s') и возвращает батчи.
+    '''Сохраняет переходы (s,a,r,d,s') и возвращает батчи.
+    
     Аргументы:
-        size: int размер буфера
-        n_step: int
+        size: int. Размер буфера
+        n_step: int. N-step алгоритм
         discount_factor: float
         num_var: int (Кол-во сохраянемых переменных, по умполчанию 5 (s, a, r, d, s'))
     '''
@@ -67,7 +67,8 @@ class Random_Buffer:
         self.real_size = 0
         if self.n_step_buffer != None: self.n_step_buffer.clear()
 
-    def add(self, samples, args=None):
+    def add(self, samples: tuple, args=None):
+        """Добавляет данные в буфер"""
         if self.n_step_buffer != None:
           result = self.n_step_buffer.add(samples)
           if result != None:
@@ -77,6 +78,7 @@ class Random_Buffer:
           return self._add_data(samples)            
     
     def sample(self, batch_size, idx=None):
+        """Возвращает батч: dict"""
         if np.any(idx) == None:
             idx = self._get_idx( batch_size)
         state = np.stack(self.data[idx, 0], axis=0).astype(np.float32)
@@ -115,14 +117,14 @@ class Random_Buffer:
     def _get_idx(self, batch_size):
         return np.random.choice(self.real_size, size = batch_size, replace = False)
 
-class Random_Replay_Recurrent_Buffer(Random_Buffer):
+class Random_Recurrent_Buffer(Random_Buffer):
     '''
     Аргументы:
-        size: int
-        n_step: int
+        size: int. Размер буфера
+        n_step: int. N-step алгоритм
         discount_factor: float
         num_var: int (Кол-во сохраняемых переменных, по умполчанию 7 (s, a, r, d, s', h, c))
-        trace_length: int
+        trace_length: int. Длина возращаемой последовательности
     '''
     def __init__(self, **kwargs):
         kwargs["num_var"] = 7
