@@ -1,5 +1,8 @@
 from tensorflow.keras import layers
 
+from ..models.base_model import *
+from ..algoritms.base_algo import *
+
 class DQN_Model(ModelNN, ModelIO, Model):
   def __init__(self, config = None, model = None, **kwargs):
     super().__init__(model = model, config = config, **kwargs)
