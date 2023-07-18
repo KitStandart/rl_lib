@@ -1,5 +1,5 @@
 import numpy as np
-from data_saver.utils import save_data, load_data
+from ..data_saver.utils import save_data, load_data
 
 class _n_step_buffer:
     def __init__(self, **kwargs):
