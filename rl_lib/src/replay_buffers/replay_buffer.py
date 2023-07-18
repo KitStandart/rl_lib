@@ -1,4 +1,5 @@
-from .replay_buffers import *
+from .random_buffers import *
+from .priority_buffers import *
 
 class Replay_Buffer:
   
