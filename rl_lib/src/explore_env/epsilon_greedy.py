@@ -1,7 +1,8 @@
 import numpy as np 
 from saving_data.utils import save_data, load_data
+from .base_explore import Base_Explore
 
-class Epsilon_Greedy:
+class Epsilon_Greedy(Base_Explore):
     '''Epsilon greedy explore strategy'''
     def __init__(self, **kwargs):
         self.eps_desay_steps = kwargs.get("eps_decay_steps", 1e6)
