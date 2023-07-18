@@ -27,20 +27,24 @@ class Replay_Buffer:
       if kwargs.get("recurrent", 0):Random_Recurrent_Buffer(**kwargs)
       else: self.buffer = Random_Buffer(**kwargs)
 
-  def clear():
+  @property
+  def name(self):
+    return self.buffer.name
+    
+  def clear(self):
     self.buffer.clear()
     
-  def add(*args):
+  def add(self, *args):
     self.buffer.add(*args)
 
-  def sample(*args):
+  def sample(self, *args):
     return self.buffer.sample(*args)
 
-  def update_priorities(*args):
+  def update_priorities(self, *args):
     self.buffer.update_priorities(*args)
 
-  def save(*args):
+  def save(self, *args):
     self.buffer.save(*args)
     
-  def load(*args):
+  def load(self, *args):
     self.buffer.load(*args)
