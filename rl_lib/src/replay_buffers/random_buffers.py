@@ -53,7 +53,8 @@ class Random_Buffer:
         discount_factor = kwargs.get("discount_factor", 0.99)
         num_var = kwargs.get("num_var", 5)
         # буфер для хранения перехода     
-        self.data = np.zeros((self.size, num_var), dtype=object)        
+        self.data = np.zeros((self.size, num_var), dtype=object)  
+        self.name = "Random_Buffer"
         
         # размер буфера
         self.count = 0
@@ -129,6 +130,7 @@ class Random_Recurrent_Buffer(Random_Buffer):
     def __init__(self, **kwargs):
         kwargs["num_var"] = 7
         super().__init__(**kwargs)
+        self.name = "Random_Recurrent_Buffer"
         self.trace_length = kwargs.get("trace_length", 10)
 
     def sample(self, batch_size, idx=None):
