@@ -1,9 +1,13 @@
 from .replay_buffers.replay_buffer import Replay_Buffer
+import os
 
 class Test_Replay_Buffer:
-  def __init__(self):
-    self.buffer = Replay_Buffer
-
+  def __init__(self, buffer_args):
+    self.buffer = Replay_Buffer(**buffer_args)
+    self.path = os.getcwd() + '/test_replay_buffer/'
+    if not os.path.isdir(self.path):
+      os.mkdir(self.path)
+    
   def test_add_args():
     pass
 
