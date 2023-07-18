@@ -2,9 +2,7 @@ from .random_buffers import *
 from .priority_buffers import *
 
 class Replay_Buffer:
-  
-  def __init__(self, **kwargs):
-    """Сохраняет переходы и выполняет сэмплирование батчей
+  """Сохраняет переходы и выполняет сэмплирование батчей
     Kwargs: 
         priority: bool True если приоритетный
         recurrent: bool True если рекуррентный
@@ -20,6 +18,8 @@ class Replay_Buffer:
         max_priority: float Максимальный приоритет при добавлении новых данных
         trace_length: int. Длина возращаемой последовательности
     """
+  
+  def __init__(self, **kwargs):
     if kwargs.get("priority", 0) :
       if kwargs.get("recurrent", 0):Prioritized_Replay_Recurrent_Buffer(**kwargs)
       else: self.buffer = Prioritized_Replay_Buffer(**kwargs)
