@@ -94,6 +94,7 @@ class Random_Buffer:
         return {'state': state, 'action': action, 'reward': reward, 'done': done, 'next_state': next_state, **other_data}
 
     def save(self, path):
+        path += self.name
         save_data(path, {
                 'data': self.data,
                 'count': self.count,
@@ -102,6 +103,7 @@ class Random_Buffer:
                     })
 
     def load(self, path):
+        path += self.name
         data = load_data(path)
         self.data = data['data']
         self.count = data['count']
