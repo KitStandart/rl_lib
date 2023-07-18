@@ -1,6 +1,6 @@
 import numpy as np
 from saving_data.utils import save_data, load_data
-from .random_buffer import Random_Buffer, Random_Replay_Recurrent_Buffer
+from .random_buffer import Random_Buffer, Random_Recurrent_Buffer
 
 class Sum_Tree:
     def __init__(self, size):
@@ -143,12 +143,12 @@ class Prioritized_Replay_Buffer(Random_Buffer):
         weights = weights.astype(np.float32)
         return weights
 
-class PrioritizedReplayBufferRecurrent(Prioritized_Replay_Buffer, Random_Replay_Recurrent_Buffer, Random_Buffer):
+class Prioritized_Replay_Recurrent_Buffer(Prioritized_Replay_Buffer, Random_Recurrent_Buffer, Random_Buffer):
     def __init__(self, **kwargs):
         kwargs["num_var"] = 7
         self.trace_length = kwargs.get("trace_length", 10)
         Prioritized_Replay_Buffer.__init__(self, **kwargs)
-        Random_Replay_Recurrent_Buffer.__init__(self, **kwargs)
+        Random_Recurrent_Buffer.__init__(self, **kwargs)
         
         kwargs["size"] = self.trace_length
         self.trace_window = Random_Buffer(**kwargs) #нужно для того чтобы граничные индексы кольцевого буфера из приоритетного выбора были с историческими данными
@@ -168,7 +168,7 @@ class PrioritizedReplayBufferRecurrent(Prioritized_Replay_Buffer, Random_Replay_
     def sample(self, batch_size):
         if self.data[-1][1] == 0: self.data[-self.trace_length:] = self.trace_window.data
         data_idxs, weights = Prioritized_Replay_Buffer._get_idx(self, batch_size)
-        data = Random_Replay_Recurrent_Buffer.sample(self, batch_size, data_idxs)
+        data = Random_Recurrent_Buffer.sample(self, batch_size, data_idxs)
         data = self.add_trace_window(data, data_idxs)
         return {**data, 'data_idxs': data_idxs, 'weights': weights}       
 
