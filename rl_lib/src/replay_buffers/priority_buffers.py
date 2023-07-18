@@ -70,7 +70,8 @@ class Prioritized_Replay_Buffer(Random_Buffer):
     def __init__(self, **kwargs):
         size = kwargs.get("size", 100000)
         Random_Buffer.__init__(self, **kwargs)
-
+        self.name = "Prioritized_Replay_Buffer"
+        
         self.tree = Sum_Tree(size=size)
         # PER params
         self.eps = kwargs.get("eps", 1e-2)  
@@ -149,6 +150,7 @@ class Prioritized_Replay_Recurrent_Buffer(Prioritized_Replay_Buffer, Random_Recu
         self.trace_length = kwargs.get("trace_length", 10)
         Prioritized_Replay_Buffer.__init__(self, **kwargs)
         Random_Recurrent_Buffer.__init__(self, **kwargs)
+        self.name = "Prioritized_Replay_Recurrent_Buffer"
         
         kwargs["size"] = self.trace_length
         self.trace_window = Random_Buffer(**kwargs) #нужно для того чтобы граничные индексы кольцевого буфера из приоритетного выбора были с историческими данными
