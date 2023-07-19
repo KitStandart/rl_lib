@@ -38,7 +38,7 @@ class SimpleQ(Base_Algo):
   @tf.function(reduce_retracing=True,
                  jit_compile=False,
                  experimental_autograph_options = tf.autograph.experimental.Feature.ALL)
-  def calculate_Qtarget(self, **kwargs):
+  def calculate_target(self, **kwargs):
     Qtarget = self.calculate_best_acitons(**kwargs)
     dones = tf.ones((self.batch_size,), dtype=tf.dtypes.float32) if not self.recurrent else tf.ones((self.batch_size, kwargs.get('trace_length', 10)), dtype=tf.dtypes.float32)
     dones = dones - kwargs['done']
