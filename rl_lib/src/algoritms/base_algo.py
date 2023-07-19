@@ -23,7 +23,7 @@ class Base_Algo(abc.ABC):
     """Инициализирует модель в соответствии с типом алгоритма"""
     model = self._initial_model()
     optimizer = self.config.get("optimizer")
-    optimizer_name = optimizer.get("optimizer", "adam")
+    optimizer_name = optimizer.get("optimizer_name", "adam")
     optimizer_params = optimizer.get("optimizer_params", {})
     cutom_optimizer = optimizer.get("cutom_optimizer", None)
     optimizer = set_optimizer(optimizer_name, optimizer_params, cutom_optimizer)
