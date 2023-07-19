@@ -48,7 +48,7 @@ class ModelIO(Saver, abc.ABC):
     """Возвращает конфигурацию алгоритма"""
     return self._config
   
-  @staticmetod
+  @staticmethod
   def load_default_config(path):
     return load_default_config(os_path.join(os_path.dirname(path),"./config.yaml"))
     
