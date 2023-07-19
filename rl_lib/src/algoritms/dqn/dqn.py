@@ -7,8 +7,7 @@ from rl_lib.rl_lib.src.data_saver.utils import load_default_config
 
 class DQN_Model(Model):
   def __init__(self, config = None,**kwargs):
-    self.config = load_default_config("./config.yaml")
-    super().__init__(model_config = config.get('model_config', {}), config = config, **kwargs)
+    super().__init__(model_config = config.get('model_config', {}), config = config,  default_config_path=__file__, **kwargs)
   
   def _prediction_processing(self, input_data):
     pass
