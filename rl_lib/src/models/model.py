@@ -12,10 +12,8 @@ class Model(ModelNN, ModelIO, BaseModel, abc.ABC):
     return self.model.layers[-1].input_shape[0]
 
   def load(self):
-    """Args: ModelIO.path, ModelNN.name"""
     self.model = tf.keras.models.load_model(self.path+self.name+'.h5')
 
   def save(self):
-    """Args: ModelIO.path, ModelNN.name"""
     print(self.name)
     self.model.save(self.path+self.name+'.h5')
