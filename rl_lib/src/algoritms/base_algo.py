@@ -7,7 +7,7 @@ class Base_Algo(abc.ABC):
   """Базовый абстрактный класс алгоритма.
   Хранит все методы, необходимые для вычислений в каком либо алгоритме.
   """
-  def __init__(self, action_model: object, target_model: object, **config):
+  def __init__(self, action_model: object = object, target_model: object = object, **config):
     super().__init__(**config)
     self.action_model = action_model
     self.target_model = target_model
