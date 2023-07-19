@@ -9,24 +9,28 @@ class ExplorationManager(Base_Explore):
     strategy_config: dict, Параметры стратегии
   """
   def __init__(self, strategy_name="epsilon_greedy", strategy_config = {}):
-    self.config = {strategy_name="epsilon_greedy", strategy_config = {}}
+    self._config = {strategy_name="epsilon_greedy", strategy_config = {}}
     if strategy_name.lower() == "epsilon_greedy":
       self.strategy = Epsilon_Greedy(strategy_config)
     if strategy_name.lower() == "soft_q":
       self.strategy = Soft_Q(strategy_config)
     self.strategy_name = self.strategy.name
-      
+    
+  def __call__(self, Q):
+      return self.strategy(Q)
+    
+  @property
+  def config(self):
+    return self.config
+    
+  def load(self, path):
+    self.strategy.load(path)    
+    
   def reset(self, ):
     self.strategy.reset()
   
   def save(self, path):
     self.strategy.save(path)
-  
-  def load(self, path):
-    self.strategy.load(path)
-  
-  def __call__(self, Q):
-      return self.strategy(Q)
   
   def test(self, Q):
       return self.strategy.test(Q)
