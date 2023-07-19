@@ -1,7 +1,7 @@
 from tensorflow.keras import layers
 
 from ..models.model import Model
-from ..algoritms.base_algo import Base_Algo
+from ..algoritms.simple_q import SimpleQ
 
 class DQN_Model(ModelNN, ModelIO, Model):
   def __init__(self, config = None, model = None, **kwargs):
@@ -18,9 +18,9 @@ class DQN_Model(ModelNN, ModelIO, Model):
 
 class DQN_Algo(SampleQ):
   def __init__(self, config, model):
+    action_model = DQN_Model(model = model, config = config, name = "DQN_action" + config.get("name", ""))
+    target_model = DQN_Model(model = model, config = config, name = "DQN_target" + config.get("name", ""))
     super().__init__(model = model, config = config)
-    self.action_model = DQN_Model(model = model, config = config, name = "DQN_action" + config.get("name", ""))
-    self.target_model = DQN_Model(model = model, config = config, name = "DQN_target" + config.get("name", ""))
 
   @staticmethod
   def create_model(input_shape: tuple, action_space: int) -> tf.keras.Model:
