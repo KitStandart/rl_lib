@@ -1,7 +1,7 @@
 import tensorflow as tf
 import abc
 
-from rl_lib.rl_lib.src.optimizers.optimizer import get_optimizer
+from rl_lib.rl_lib.src.optimizers.optimizers import get_optimizer
 
 class Base_Algo(abc.ABC):
   """Базовый абстрактный класс алгоритма.
