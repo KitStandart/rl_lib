@@ -1,7 +1,7 @@
 from .random_buffers import *
 from .priority_buffers import *
 
-class Replay_Buffer:
+class ReplayBuffer:
   """Сохраняет переходы и выполняет сэмплирование батчей
     Kwargs: 
         priority: bool True если приоритетный
