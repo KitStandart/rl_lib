@@ -4,7 +4,7 @@ import abc
 import tensorflow as tf
 
 
-class Model(abc.ABC):
+class BaseModel(abc.ABC):
   """Абстрактный базовый класс,
   представляющий общий интерфейс для всех алгоритмов и моделей в RL-Lib.
 
@@ -124,7 +124,7 @@ class ModelNN(abc.ABC):
   @tf.function(reduce_retracing=True,
                  jit_compile=False,
                  experimental_autograph_options = tf.autograph.experimental.Feature.ALL)
-  def calculate_gradients(self, **kwargs):
+  def calculate_gradients(self, **kwargs) -> dict:
       """
       Вычисляет градиенты, лосс, td-ошибку
 
@@ -147,7 +147,7 @@ class ModelNN(abc.ABC):
   @tf.function(reduce_retracing=True,
                  jit_compile=False,
                  experimental_autograph_options = tf.autograph.experimental.Feature.ALL)
-  def update_weights(self, **kwargs):
+  def update_weights(self, **kwargs) -> dict:
       """
       Выполняет шаг отимизатора
 
