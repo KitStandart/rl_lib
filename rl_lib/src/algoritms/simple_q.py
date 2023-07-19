@@ -33,7 +33,8 @@ class SimpleQ(Base_Algo):
   
   def calculate_new_best_action(self) -> tf.Tensor:
     """Вычислеят новое лучшее действие для получения таргета"""
-
+    pass
+    
   @tf.function(reduce_retracing=True,
                  jit_compile=False,
                  experimental_autograph_options = tf.autograph.experimental.Feature.ALL)
@@ -57,7 +58,8 @@ class SimpleQ(Base_Algo):
     
   def get_gradients(self) -> tf.Tensor:
     """Вычисляет градиенты и возвращает их"""
-
+    pass
+    
   def load(self, path) -> None:
     """Загружает алгоритм"""
     self.action_model.load(path)
