@@ -39,7 +39,8 @@ class BaseModel(abc.ABC):
 class ModelIO(Saver, abc.ABC):
   def __init__(self, config: dict, **kwargs):
     super().__init__(**kwargs)
-    self._config = config
+    self._config = {}
+    self._config.update(config)
 
   @property
   def config(self) -> dict:
@@ -63,11 +64,11 @@ class ModelNN(abc.ABC):
     name: str Необязательно, название модели   
   """
 
-  def __init__(self, model: tf.keras.Model, **kwargs):
+  def __init__(self, model_config: dict, **kwargs):
     super().__init__(**kwargs)
-    self.model = model
-    self.name = kwargs.get('name', 'None')
-    self.validate_args()
+    self.model = model_config.get('model', None)
+    self.name = model_config.get('name', 'None')
+    # self.validate_args()
   
   def __call__(self, inputs: tf.Tensor) -> tf.Tensor:
     return self.model(inputs)
