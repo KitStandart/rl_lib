@@ -3,6 +3,7 @@ from rl_lib.rl_lib.src.data_saver.utils import load_default_config
 
 import abc
 import tensorflow as tf
+import os.path as os_path
 
 
 class BaseModel(abc.ABC):
