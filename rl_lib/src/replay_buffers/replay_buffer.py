@@ -31,7 +31,7 @@ class ReplayBuffer:
   def add(self, *args):
     self.buffer.add(*args)
     
-  @propety
+  @property
   def config(self):
     return self._config
     
