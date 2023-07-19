@@ -9,18 +9,18 @@ class SimpleQ(Base_Algo):
   """Произовдит все вычисления необходимые для Q-learning
   """
   def __init__(self, action_model: object, target_model: object, **config: dict):
-    super().__init__(**config)
-    
-    self.buffer = ReplayBuffer(config.get("replay_buffer", {}))
-    self.exploration = ExplorationManager(config.get("exploration", {}))
+    super().__init__(action_model, target_model, **config)
+
+    self.buffer = ReplayBuffer(**config.get("buffer_config", {}))
+    self.exploration = ExplorationManager(**config.get("exploration_config", {}))
     
     self.discount_factor = self.buffer.discount_factor
     self.n_step = self.buffer.n_step
 
-    self.batch_size = kwargs.get("batch_size", 32)
-    self.double_network = kwargs.get("double_network", True)
-    self.priority = kwargs.get("priority", False)
-    self.tau = kwargs.get("tau", 0.01)
+    self.batch_size = config.get("batch_size", 32)
+    self.double_network = config.get("double_network", True)
+    self.priority = config.get("priority", False)
+    self.tau = config.get("tau", 0.01)
 
     self.batch_dims = -1
     self.ind_axis = -1
