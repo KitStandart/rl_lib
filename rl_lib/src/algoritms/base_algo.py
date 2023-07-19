@@ -1,16 +1,17 @@
 import tensorflow as tf
 import abc
 
+from rl_lib.rl_lib.src.optimizers.optimizer import get_optimizer
+
 class Base_Algo(abc.ABC):
   """Базовый абстрактный класс алгоритма.
   Хранит все методы, необходимые для вычислений в каком либо алгоритме.
   """
   def __init__(self, action_model = object, target_model = object, **config):
-      super().__init__(**config)
-      self.action_model = action_model
-      self.target_model = target_model
-  
-  
+    super().__init__(**config)
+    self.action_model = action_model
+    self.target_model = target_model
+    self._config = action.model.config
 
   def _initial_model(self):
     if len(self._config["input_shape"]) == 1:
@@ -19,11 +20,20 @@ class Base_Algo(abc.ABC):
       return self.create_model_with_conv(self._config["input_shape"], self._config["action_space"])
 
   def initial_model(self):
-      """Инициализирует модель в соответствии с типом алгоритма"""
-      model = self._initial_model()
-      self.action_model.set_new_model(model, )
-      self.target_model.set_new_model(model, )
-      self.target_model.set_weights(self.action_model.get_weights())
+    """Инициализирует модель в соответствии с типом алгоритма"""
+    model = self._initial_model()
+    optimizer = self.config.get("optimizer")
+    optimizer_name = optimizer.get("optimizer", "adam")
+    optimizer_params = optimizer.get("optimizer_params", {})
+    cutom_optimizer = optimizer.get("cutom_optimizer", None)
+    optimizer = set_optimizer(optimizer_name, optimizer_params, cutom_optimizer)
+    self.action_model.set_new_model(model, optimizer)
+    self.target_model.set_new_model(model, optimizer)
+    self.target_model.set_weights(self.action_model.get_weights())
+
+  @property
+  def config(self):
+      return self._config
     
   @staticmethod
   @abc.abstractclassmethod
