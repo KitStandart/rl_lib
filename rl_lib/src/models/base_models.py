@@ -1,4 +1,5 @@
 from ..data_saver.data_saver import Saver
+from rl_lib.rl_lib.src.data_saver.utils import load_default_config
 
 import abc
 import tensorflow as tf
@@ -37,16 +38,20 @@ class BaseModel(abc.ABC):
     """Обновляет внутреннее состояние реккурентной Модели"""
 
 class ModelIO(Saver, abc.ABC):
-  def __init__(self, config: dict, **kwargs):
+  def __init__(self, default_config_path: str, config: dict, **kwargs):
     super().__init__(**kwargs)
-    self._config = {}
+    self._config = self.load_default_config(default_config_path)
     self._config.update(config)
 
   @property
   def config(self) -> dict:
     """Возвращает конфигурацию алгоритма"""
     return self._config
-
+  
+  @staticmetod
+  def load_default_config(path):
+    return load_default_config(os_path.join(os_path.dirname(path),"./config.yaml"))
+    
   @abc.abstractmethod
   def save(self) -> None:
     """Сохраняет модель в директории"""
