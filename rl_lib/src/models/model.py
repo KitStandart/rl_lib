@@ -5,8 +5,8 @@ from .base_models import ModelNN, ModelIO, BaseModel
 
 class Model(ModelNN, ModelIO, BaseModel, abc.ABC):
   """Абстрактный класс модели, который соединяет все методы классов ModelNN, ModelIO, BaseModel"""
-  def __init__(self, **config: dict):
-    super().__init__(**config)
+  def __init__(self, default_config_path: str, **config: dict):
+    super().__init__(default_config_path, **config)
 
   def input_spec(self):
     return self.model.layers[0].input_shape[0]
