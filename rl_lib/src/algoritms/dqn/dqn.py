@@ -20,9 +20,9 @@ class DQN_Model(Model):
 
 class DQN(SimpleQ):
   def __init__(self, config):
-    self.action_model = DQN_Model(config, name = "DQN_action" + config['model'].get("name", ""))
-    self.target_model = DQN_Model(config, name = "DQN_target" + config['model'].get("name", ""))
-    super().__init__(action_model, target_model, config = config)
+    action_model = DQN_Model(config, name = "DQN_action" + config['model_config'].get("name", ""))
+    target_model = DQN_Model(config, name = "DQN_target" + config['model_config'].get("name", ""))
+    super().__init__(action_model, target_model, **config)
 
   @staticmethod
   def create_model(input_shape: tuple, action_space: int) -> tf.keras.Model:
