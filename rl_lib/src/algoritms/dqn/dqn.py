@@ -6,7 +6,7 @@ from rl_lib.rl_lib.src.algoritms.simple_q import SimpleQ
 from rl_lib.rl_lib.src.data_saver.utils import load_default_config
 
 class DQN_Model(Model):
-  def __init__(self, config = None,**kwargs):
+  def __init__(self, config = {},**kwargs):
     super().__init__(model_config = config.get('model_config', {}), config = config,  default_config_path=__file__, **kwargs)
   
   def _prediction_processing(self, input_data):
