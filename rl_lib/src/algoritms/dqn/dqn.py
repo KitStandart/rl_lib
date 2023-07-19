@@ -1,11 +1,14 @@
+import tensorflow as tf
 from tensorflow.keras import layers
 
-from ..models.model import Model
-from ..algoritms.simple_q import SimpleQ
+from rl_lib.rl_lib.src.models.model import Model
+from rl_lib.rl_lib.src.algoritms.simple_q import SimpleQ
+from rl_lib.rl_lib.src.data_saver.utils import load_default_config
 
-class DQN_Model(ModelNN, ModelIO, Model):
-  def __init__(self, config = None, model = None, **kwargs):
-    super().__init__(model = model, config = config, **kwargs)
+class DQN_Model(Model):
+  def __init__(self, config = None,**kwargs):
+    self.config = load_default_config("./config.yaml")
+    super().__init__(model_config = config.get('model_config', {}), config = config, **kwargs)
   
   def _prediction_processing(self, input_data):
     pass
@@ -16,7 +19,7 @@ class DQN_Model(ModelNN, ModelIO, Model):
   def initial_state(self):
     pass
 
-class DQN_Algo(SampleQ):
+class DQN_Algo(SimpleQ):
   def __init__(self, config, model):
     action_model = DQN_Model(model = model, config = config, name = "DQN_action" + config.get("name", ""))
     target_model = DQN_Model(model = model, config = config, name = "DQN_target" + config.get("name", ""))
