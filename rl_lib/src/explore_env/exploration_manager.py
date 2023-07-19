@@ -1,6 +1,6 @@
 from .epsilon_greedy import Epsilon_Greedy
 from .soft_q import Soft_Q
-from .base_algo import Base_Algo
+from .base_explore import Base_Explore
 
 class ExplorationManager(Base_Explore):
   """Выбирает стратегию исследования и выполняет все ее функции
