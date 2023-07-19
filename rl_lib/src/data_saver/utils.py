@@ -10,5 +10,5 @@ def load_data(path):
     loaded_data = load(f)
   return loaded_data
 
-def load_default_confgi(path):
+def load_default_config(path):
   return safe_load(open(path, "rb"))
