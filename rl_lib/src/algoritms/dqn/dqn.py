@@ -19,10 +19,10 @@ class DQN_Model(Model):
     pass
 
 class DQN(SimpleQ):
-  def __init__(self, config, model):
-    self.action_model = DQN_Model(model = model, config = config, name = "DQN_action" + config.get("name", ""))
-    self.target_model = DQN_Model(model = model, config = config, name = "DQN_target" + config.get("name", ""))
-    super().__init__(model = model, config = config)
+  def __init__(self, config):
+    self.action_model = DQN_Model(config, name = "DQN_action" + config['model'].get("name", ""))
+    self.target_model = DQN_Model(config, name = "DQN_target" + config['model'].get("name", ""))
+    super().__init__(action_model, target_model, config = config)
 
   @staticmethod
   def create_model(input_shape: tuple, action_space: int) -> tf.keras.Model:
