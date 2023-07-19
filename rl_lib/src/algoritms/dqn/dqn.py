@@ -18,10 +18,10 @@ class DQN_Model(Model):
   def initial_state(self):
     pass
 
-class DQN_Algo(SimpleQ):
+class DQN(SimpleQ):
   def __init__(self, config, model):
-    action_model = DQN_Model(model = model, config = config, name = "DQN_action" + config.get("name", ""))
-    target_model = DQN_Model(model = model, config = config, name = "DQN_target" + config.get("name", ""))
+    self.action_model = DQN_Model(model = model, config = config, name = "DQN_action" + config.get("name", ""))
+    self.target_model = DQN_Model(model = model, config = config, name = "DQN_target" + config.get("name", ""))
     super().__init__(model = model, config = config)
 
   @staticmethod
