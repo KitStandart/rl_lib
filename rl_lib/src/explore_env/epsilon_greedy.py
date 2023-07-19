@@ -23,7 +23,7 @@ class Epsilon_Greedy(Base_Explore):
         self.eps_test = eps_test
         assert type(action_space) == int, "Пространство действий должно быть int"
         self.action_space = action_space 
-        self.axis = kwargs.get("action_space", 2)
+        self.axis = axis
         self.name = "epsilon_greedy_strategy"
         self.reset()
 
