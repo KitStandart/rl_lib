@@ -1,4 +1,5 @@
 from .epsilon_greedy import Epsilon_Greedy
+from .soft_q import Soft_Q
 from .base_algo import Base_Algo
 
 class ExplorationManager(Base_Explore):
@@ -8,23 +9,23 @@ class ExplorationManager(Base_Explore):
     strategy_config: dict, Параметры стратегии
   """
   def __init__(self, strategy_name="epsilon_greedy", strategy_config = {}):
-    self.strategy_name = strategy_name
     if strategy_name.lower() == "epsilon_greedy":
       self.strategy = Epsilon_Greedy(strategy_config)
     if strategy_name.lower() == "soft_q":
-      pass
+      self.strategy = Soft_Q(strategy_config)
+    self.strategy_name = self.strategy.name
       
   def reset(self, ):
     self.strategy.reset()
   
   def save(self, path):
-    self.strategy.save(path+self.strategy_name)
+    self.strategy.save(path)
   
   def load(self, path):
-    self.strategy.load(path+self.strategy_name)
+    self.strategy.load(path)
   
-  def __call__(self, action):
-      return self.strategy(action)
+  def __call__(self, Q):
+      return self.strategy(Q)
   
-  def test(self, action):
-      return self.strategy.test(action)
+  def test(self, Q):
+      return self.strategy.test(Q)
