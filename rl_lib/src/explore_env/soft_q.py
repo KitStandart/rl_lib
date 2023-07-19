@@ -16,6 +16,7 @@ class Soft_Q(Base_Explore):
   def __init__(self, tau=1.0, axis=-1):
     self.tau = 1.0
     self.axis = axis
+    self.name = "soft_q_strategy"
   
   def reset(self, ) -> None:
     """Выполняет внутренний сброс"""
@@ -23,14 +24,11 @@ class Soft_Q(Base_Explore):
   
   def save(self, path) -> None:
     """Сохраняет какие либо внутренние переменные"""
-    save_data(path ,{
-                'count': self.count,
-                    })
+    save_data(path+self.name, self.__dict__)
  
   def load(self, path) -> None:
     """Загружает какие либо внутренние переменные"""
-    data = load_data(path)
-    self.count = data['count']
+    self.__dict__ = load_data(path+self.name)
   
   def __call__(self, Q) -> int:
     """Возвращает действие в соответствии с стратегией исследования"""
