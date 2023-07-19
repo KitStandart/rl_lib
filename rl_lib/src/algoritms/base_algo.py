@@ -26,7 +26,7 @@ class Base_Algo(abc.ABC):
     optimizer_name = optimizer.get("optimizer_name", "adam")
     optimizer_params = optimizer.get("optimizer_params", {})
     cutom_optimizer = optimizer.get("cutom_optimizer", None)
-    optimizer = set_optimizer(optimizer_name, optimizer_params, cutom_optimizer)
+    optimizer = get_optimizer(optimizer_name, optimizer_params, cutom_optimizer)
     self.action_model.set_new_model(model, optimizer)
     self.target_model.set_new_model(model, optimizer)
     self.target_model.set_weights(self.action_model.get_weights())
