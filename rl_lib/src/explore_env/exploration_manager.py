@@ -9,7 +9,7 @@ class ExplorationManager(Base_Explore):
     strategy_config: dict, Параметры стратегии
   """
   def __init__(self, strategy_name="epsilon_greedy", strategy_config = {}):
-    self._config = {strategy_name="epsilon_greedy", strategy_config = {}}
+    self._config = {strategy_name, strategy_config}
     if strategy_name.lower() == "epsilon_greedy":
       self.strategy = Epsilon_Greedy(strategy_config)
     if strategy_name.lower() == "soft_q":
