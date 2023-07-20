@@ -22,7 +22,7 @@ class DQN(SimpleQ):
   def __init__(self, config):
     action_model = DQN_Model(config, name = "DQN_action" + config['model_config'].get("name", ""))
     target_model = DQN_Model(config, name = "DQN_target" + config['model_config'].get("name", ""))
-    config = action_model.config.update(config)
+    config.update(action_model.config)
     print(config)
     print(action_model.config)
     super().__init__(action_model, target_model, **config)
