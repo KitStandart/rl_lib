@@ -17,16 +17,7 @@ class DQN_Model(Model):
 
   def initial_state(self):
     pass
-
-class DQN(SimpleQ):
-  def __init__(self, config):
-    action_model = DQN_Model(config, name = "DQN_action" + config['model_config'].get("name", ""))
-    target_model = DQN_Model(config, name = "DQN_target" + config['model_config'].get("name", ""))
-    config.update(action_model.config)
-    print(config)
-    print(action_model.config)
-    super().__init__(action_model, target_model, **config)
-
+    
   @staticmethod
   def create_model(input_shape: tuple, action_space: int) -> tf.keras.Model:
     """Создает модель tf.keras.Model, архитектура DQN"""
@@ -51,3 +42,23 @@ class DQN(SimpleQ):
     dence_out = layers.Dense(action_space, activation=None)(dence_layer2)
     
     return tf.keras.Model(inputs=input_layer, outputs=dence_out)
+    
+class DQN(SimpleQ):
+  def __init__(self, config):
+    action_model = DQN_Model(config, name = "DQN_action" + config['model_config'].get("name", ""))
+    target_model = DQN_Model(config, name = "DQN_target" + config['model_config'].get("name", ""))
+    config.update(action_model.config)
+    print(config)
+    print(action_model.config)
+    super().__init__(action_model, target_model, **config)
+
+  def _prediction_processing(self, input_data):
+    pass
+
+  def _update_next_state(self, state, action):
+    pass
+
+  def initial_state(self):
+    pass
+
+  
