@@ -1,7 +1,7 @@
 import tensorflow.keras.optimizers as optimizers
 import tensorflow_addons as tfa
 
-def get_optimizer(self, optimizer_name: str = "adam", optimizer_params: dict = {}, cutom_optimizer: object = None) -> object:
+def get_optimizer(optimizer_name: str = "adam", optimizer_params: dict = {}, cutom_optimizer: object = None) -> object:
   """Возврщает настроенный оптимизатор.
   Доступные оптимизаторы tensorflow:
     Adam
