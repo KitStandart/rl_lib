@@ -18,9 +18,9 @@ class SimpleQ(Base_Algo):
     self.discount_factor = self.config['model_config']['discount_factor']
     self.n_step = self.config['model_config']['n_step']
 
-    self.batch_size = self.config['model_config']get("batch_size")
-    self.double_network = self.config['model_config']get("double_network")
-    self.priority = self.config['model_config']get("priority")
+    self.batch_size = self.config['model_config'].get("batch_size")
+    self.double_network = self.config['model_config'].get("double_network")
+    self.priority = self.config['model_config'].get("priority")
     self.tau = self.config['model_config'].get("tau")
 
     self.batch_dims = -1
