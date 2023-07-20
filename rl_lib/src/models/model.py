@@ -2,17 +2,18 @@ import tensorflow as tf
 import abc
 
 from .base_models import ModelNN, ModelIO, BaseModel
+from ..optimizers.optimizers import get_optimizer
 
 class Model(ModelNN, ModelIO, BaseModel, abc.ABC):
   """Абстрактный класс модели, который соединяет все методы классов ModelNN, ModelIO, BaseModel"""
   def __init__(self, **config: dict):
     super().__init__(**config)
-    
+    self.initial_model()
 
   def _initial_model(self):
     input_shape = self._config['model_config']["input_shape"]
     action_space =  self._config['model_config']["action_space"]
-    if len(self._config["input_shape"]) == 1:
+    if len(input_shape) == 1:
       return self.create_model(input_shape, action_space)
     else:
       return self.create_model_with_conv(input_shape, action_space)
