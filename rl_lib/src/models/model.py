@@ -22,9 +22,9 @@ class Model(ModelNN, ModelIO, BaseModel, abc.ABC):
     """Инициализирует модель в соответствии с типом алгоритма"""
     if str(self.config['model_config']['model']) == 'None': model = self._initial_model()
     else:  model = self.config['model_config']['model']
-    optimizer = self.config.get("optimizer")
+    optimizer = self.config.get("optimizer_config")
     optimizer = get_optimizer(**optimizer)
-    self.model.set_new_model(model, optimizer)
+    self.set_new_model(model, optimizer)
 
   def input_spec(self):
     return self.model.layers[0].input_shape[0]
