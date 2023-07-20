@@ -11,39 +11,13 @@ class Base_Algo(abc.ABC):
     self.action_model = action_model
     self.target_model = target_model
     self._config = self.action_model.config
+    
     super().__init__()
-
-  def _initial_model(self):
-    if len(self._config["input_shape"]) == 1:
-        return self.create_model(self._config["input_shape"], self._config["action_space"])
-    else:
-      return self.create_model_with_conv(self._config["input_shape"], self._config["action_space"])
-
-  def initial_model(self):
-    """Инициализирует модель в соответствии с типом алгоритма"""
-    model = self._initial_model()
-    optimizer = self.config.get("optimizer")
-    optimizer_name = optimizer.get("optimizer_name", "adam")
-    optimizer_params = optimizer.get("optimizer_params", {})
-    cutom_optimizer = optimizer.get("cutom_optimizer", None)
-    optimizer = get_optimizer(optimizer_name, optimizer_params, cutom_optimizer)
-    self.action_model.set_new_model(model, optimizer)
-    self.target_model.set_new_model(model, optimizer)
     self.target_model.set_weights(self.action_model.get_weights())
 
   @property
   def config(self):
       return self._config
-    
-  @staticmethod
-  @abc.abstractclassmethod
-  def create_model(input_shape: tuple, action_space: int) -> tf.keras.Model:
-     """Создает модель по умолчанию и возвращает tf.keras.Model, архитектура в соответствии с алгоритмом, начальные слои - полносвязные"""
-    
-  @staticmethod
-  @abc.abstractclassmethod
-  def create_model_with_conv(input_shape: tuple, action_space: int) -> tf.keras.Model:
-    """Создает модель по умолчанию  и возвращает tf.keras.Model, архитектура в соответствии с алгоритмом, начальные слои - сверточные"""
 
   @abc.abstractclassmethod
   def calculate_new_best_action(self) -> tf.Tensor:
