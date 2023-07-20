@@ -108,3 +108,4 @@ def link_data_inside_the_config(config):
   config['buffer_config']['discount_factor'] = discount_factor
   config['buffer_config']['n_step'] = n_step
   config['exploration_config']['strategy_config']['action_space'] = action_space
+  return config
