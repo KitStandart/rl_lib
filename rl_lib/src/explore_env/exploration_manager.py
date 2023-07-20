@@ -10,10 +10,11 @@ class ExplorationManager(Base_Explore):
   """
   def __init__(self, strategy_name="epsilon_greedy", strategy_config = {}):
     self._config = {"strategy_name": strategy_name, "strategy_config": strategy_config}
+    print(self._config)
     if strategy_name.lower() == "epsilon_greedy":
-      self.strategy = Epsilon_Greedy(strategy_config)
+      self.strategy = Epsilon_Greedy(**strategy_config)
     if strategy_name.lower() == "soft_q":
-      self.strategy = Soft_Q(strategy_config)
+      self.strategy = Soft_Q(**strategy_config)
     self.strategy_name = self.strategy.name
     
   def __call__(self, Q):
