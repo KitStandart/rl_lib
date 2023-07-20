@@ -10,14 +10,16 @@ class Model(ModelNN, ModelIO, BaseModel, abc.ABC):
     
 
   def _initial_model(self):
+    input_shape = self._config['model_config']["input_shape"]
+    action_space =  self._config['model_config']["action_space"]
     if len(self._config["input_shape"]) == 1:
-        return self.create_model(self._config["input_shape"], self._config["action_space"])
+      return self.create_model(input_shape, action_space)
     else:
-      return self.create_model_with_conv(self._config["input_shape"], self._config["action_space"])
+      return self.create_model_with_conv(input_shape, action_space)
   
   def initial_model(self):
     """Инициализирует модель в соответствии с типом алгоритма"""
-    if self.config['model_config']['model'] == 'default_model': model = self._initial_model()
+    if str(self.config['model_config']['model']) == 'None': model = self._initial_model()
     else:  model = self.config['model_config']['model']
     optimizer = self.config.get("optimizer")
     optimizer = get_optimizer(**optimizer)
