@@ -35,7 +35,7 @@ exploration_config:
     eps_max: 1.0
     eps_min: 0.1
     eps_test: 0.001
-    action_spase: None
+    action_space: None
 
 data_saver:
   path: ""
