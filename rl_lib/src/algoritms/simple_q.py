@@ -15,8 +15,8 @@ class SimpleQ(Base_Algo):
     self.buffer = ReplayBuffer(**config.get("buffer_config", {}))
     self.exploration = ExplorationManager(**config.get("exploration_config", {}))
     
-    self.discount_factor = self.buffer.discount_factor
-    self.n_step = self.buffer.n_step
+    self.discount_factor = self.config['model_config']['discount_factor']
+    self.n_step = self.config['model_config']['n_step']
 
     self.batch_size = config.get("batch_size", 32)
     self.double_network = config.get("double_network", True)
