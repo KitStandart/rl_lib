@@ -9,6 +9,7 @@ class SimpleQ(Base_Algo):
   """Произовдит все вычисления необходимые для Q-learning
   """
   def __init__(self, action_model: object, target_model: object, **config: dict):
+    config = link_data_inside_the_config(config)
     super().__init__(action_model, target_model, **config)
 
     self.buffer = ReplayBuffer(**config.get("buffer_config", {}))
@@ -98,3 +99,12 @@ class SimpleQ(Base_Algo):
   def summary(self) -> None:
     """Выводит архитектуру модели"""
     self.action_model.summary()
+
+def link_data_inside_the_config(config):
+  discount_factor = config['model_config']['discount_factor']
+  n_step = config['model_config']['n_step']
+  action_space = config['model_config']['action_space']
+
+  config['buffer_config']['discount_factor'] = discount_factor
+  config['buffer_config']['n_step'] = n_step
+  config['exploration_config']['strategy_config']['action_space'] = action_space
