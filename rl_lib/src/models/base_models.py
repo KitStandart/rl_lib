@@ -44,8 +44,6 @@ class ModelIO(Saver, abc.ABC):
     super().__init__(**kwargs)
     self._config = self.load_default_config(default_config_path)
     update_config(self._config, config)
-    if self._config['model_config']['model'] == 'None': self._config['model_config']['model'] = 'default_model'
-    #else: self._config['model_config']['model'] = 'custom_model'
     self.name = self.config.get("name","") + '_' + self._config['model_config']['name'] 
 
   @property
