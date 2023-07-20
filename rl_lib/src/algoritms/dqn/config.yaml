@@ -7,6 +7,10 @@ model_config:
   action_space: None
   discount_factor : 0.99
   n_step: 1
+  batch_size: 32
+  double_network: False
+  priority: False
+  tau: 1.0
   
 optimizer_config:
   optimizer_name: "adam"
