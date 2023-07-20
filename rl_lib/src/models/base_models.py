@@ -1,5 +1,6 @@
 from ..data_saver.data_saver import Saver
-from rl_lib.rl_lib.src.data_saver.utils import load_default_config
+from ..data_saver.utils import load_default_config
+from ..algoritms.utils import update_config
 
 import abc
 import tensorflow as tf
@@ -42,7 +43,7 @@ class ModelIO(Saver, abc.ABC):
   def __init__(self, default_config_path: str, config: dict, **kwargs):
     super().__init__(**kwargs)
     self._config = self.load_default_config(default_config_path)
-    self._config.update(config)
+    update_config(self._config, config)
     self.name = self._config['model_config']['name'] + self.config.get("name","")
 
   @property
