@@ -9,7 +9,7 @@ class SimpleQ(Base_Algo):
   """Произовдит все вычисления необходимые для Q-learning
   """
   def __init__(self, action_model: object, target_model: object, **config: dict):
-    self.config = link_data_inside_the_config(config)
+    config = link_data_inside_the_config(config)
     super().__init__(action_model, target_model, **config)
 
     self.buffer = ReplayBuffer(**config.get("buffer_config", {}))
