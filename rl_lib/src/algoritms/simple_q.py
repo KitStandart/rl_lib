@@ -4,9 +4,9 @@ import numpy as np
 from .base_algo import Base_Algo
 from rl_lib.rl_lib.src.replay_buffers.replay_buffer import ReplayBuffer
 from rl_lib.rl_lib.src.explore_env.exploration_manager import ExplorationManager
-from rl_lib.rl_lib.src.data_saver.data_saver import Saver
+from rl_lib.rl_lib.src.data_saver.saver import Saver
 
-class SimpleQ(Saver, Base_Algo):
+class SimpleQ(Base_Algo, Saver):
   """Произовдит все вычисления необходимые для Q-learning
   """
   def __init__(self, action_model: object, target_model: object, **config: dict):
