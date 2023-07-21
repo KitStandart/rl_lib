@@ -41,7 +41,7 @@ class BaseModel(abc.ABC):
 
 class ModelIO(Saver, abc.ABC):
   def __init__(self, default_config_path: str, config: dict, **kwargs):
-    super().__init__(**kwargs)
+    super().__init__(**config["saver_config"],**kwargs)
     self._config = self.load_default_config(default_config_path)
     update_config(self._config, config)
     self.name = self.config.get("name","") + self._config['model_config']['name'] 
