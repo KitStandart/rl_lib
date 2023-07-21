@@ -75,8 +75,6 @@ class ModelNN(abc.ABC):
   def __init__(self, model_config: dict, **kwargs):
     super().__init__(**kwargs)
     self.model = model_config.get('model', None)
-    self.name = model_config.get('name', 'None')
-    # self.validate_args()
   
   def __call__(self, inputs: tf.Tensor) -> tf.Tensor:
     return self.model(inputs)
