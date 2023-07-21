@@ -4,8 +4,9 @@ import numpy as np
 from .base_algo import Base_Algo
 from rl_lib.rl_lib.src.replay_buffers.replay_buffer import ReplayBuffer
 from rl_lib.rl_lib.src.explore_env.exploration_manager import ExplorationManager
+from rl_lib.rl_lib.src.data_saver.data_saver import Saver
 
-class SimpleQ(Base_Algo):
+class SimpleQ(Saver, Base_Algo):
   """Произовдит все вычисления необходимые для Q-learning
   """
   def __init__(self, action_model: object, target_model: object, **config: dict):
@@ -93,10 +94,10 @@ class SimpleQ(Base_Algo):
     
   def load(self, path) -> None:
     """Загружает алгоритм"""
-    self.action_model.load(path)
-    self.target_model.load(path)
-    self.buffer.load(path)
-    self.exploration.load(path)
+    self.action_model.load()
+    self.target_model.load()
+    self.buffer.load(self.path)
+    self.exploration.load(self.path)
 
   def reset(self) -> None:
     """Сбрасывает внутренние данные модели"""  
@@ -121,12 +122,12 @@ class SimpleQ(Base_Algo):
       _ = self.copy_weights()
     return np.mean(td_error)
       
-  def save(self, path) -> None:
+  def save(self) -> None:
     """Сохраняет алгоритм"""
-    self.action_model.save(path)
-    self.target_model.save(path)
-    self.buffer.save(path)
-    self.exploration.save(path)
+    self.action_model.save()
+    self.target_model.save()
+    self.buffer.save(self.path)
+    self.exploration.save(self.path)
 
   def summary(self) -> None:
     """Выводит архитектуру модели"""
