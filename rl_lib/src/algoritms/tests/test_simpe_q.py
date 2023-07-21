@@ -26,10 +26,10 @@ class Simple_Model(Model):
 
 class Test_Simple_Q:
   def __init__(self, config):
-    action_model = Simple_Model(config, name = "Simple_action_Model_" + config['model_config'].get("name", ""))
-    target_model = Simple_Model(config, name = "Simple_target_Model_" + config['model_config'].get("name", ""))
+    action_model = Simple_Model(config, algo_name = "SimpleQ",) #name = "Simple_action_Model_" + config['model_config'].get("name", ""))
+    target_model = Simple_Model(config, algo_name = "SimpleQ",) #name = "Simple_target_Model_" + config['model_config'].get("name", ""))
     config.update(action_model.config)
-    self.simple_q = SimpleQ(action_model, target_model, **config)
+    self.simple_q = SimpleQ(action_model, target_model, config, algo_name = "SimpleQ")
 
   def test_save(self):
     self.simple_q.save()
