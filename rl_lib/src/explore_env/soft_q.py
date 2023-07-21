@@ -18,22 +18,26 @@ class Soft_Q(Base_Explore):
     self.axis = axis
     self.name = "soft_q_strategy"
   
+  def __call__(self, Q) -> int:
+    """Возвращает действие в соответствии с стратегией исследования"""
+    return softmax(Q/self.tau, axis=self.axis)
+
+  @property
+  def name(self):
+    return self._name
+      
+  def load(self, path) -> None:
+    """Загружает какие либо внутренние переменные"""
+    self.__dict__ = load_data(path+self.name)
+
   def reset(self, ) -> None:
     """Выполняет внутренний сброс"""
     pass
   
   def save(self, path) -> None:
     """Сохраняет какие либо внутренние переменные"""
-    save_data(path+self.name, self.__dict__)
- 
-  def load(self, path) -> None:
-    """Загружает какие либо внутренние переменные"""
-    self.__dict__ = load_data(path+self.name)
-  
-  def __call__(self, Q) -> int:
-    """Возвращает действие в соответствии с стратегией исследования"""
-    return softmax(Q/self.tau, axis=self.axis)
-  
+    save_data(path+self.name, self.__dict__) 
+    
   def test(self, Q) -> int:
     """Возвращает действие в соответствии с стратегией тестирования"""
     return argmax(Q, axis=self.axis, output_type=int32)
