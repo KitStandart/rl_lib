@@ -28,11 +28,11 @@ class Test_Simple_Q:
   def __init__(self, config):
     action_model = Simple_Model(config, name = "Simple_Model_" + config['model_config'].get("name", ""))
     target_model = Simple_Model(config, name = "Simple_Model_" + config['model_config'].get("name", ""))
-    self.simple_q = SimpleQ(action_model, target_model**config)
+    self.simple_q = SimpleQ(action_model, target_model, **config)
 
   def test_save(self):
     self.simple_q.save()
-    real_structure = get_directory_strucrure(self.simple_q.path)
+    real_structure = get_directory_structure(self.simple_q.path)
     assert self.simple_q.path != self.simple_q.config['data_saver']['path'], "Пути не совпадают"
     correct_structure = {self.simple_q.name: 
                          {
