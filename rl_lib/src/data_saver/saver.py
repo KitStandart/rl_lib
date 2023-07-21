@@ -10,6 +10,7 @@ class Saver:
     copy_path: str. Путь резервного копирования
   """
   def __init__(self, copy_path="", name="", path="", **kwargs):
+    print("init")
     super().__init__()
     self.copy_path = copy_path
     self.name = name
@@ -55,7 +56,7 @@ class Saver:
     assert isinstance(self.path, str), "Неверный тип аргумента, должно быть str"
     assert isinstance(self.copy_path, str), "Неверный тип аргумента, должно быть str"
     assert isinstance(self.name, str), "Неверный тип аргумента, должно быть str"
-    assert len(self.path) > 0 and self.path[-1] == "/", "В конце пути должен быть /"
-    assert len(self.copy_path) > 0 and self.copy_path[-1] == "/", "В конце пути должен быть /"
+    if len(self.path) > 0: assert self.path[-1] == "/", "В конце пути должен быть /"
+    if len(self.copy_path) > 0: assert self.copy_path[-1] == "/", "В конце пути должен быть /"
 
  
