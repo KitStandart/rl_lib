@@ -44,7 +44,7 @@ class ModelIO(Saver, abc.ABC):
     super().__init__(**kwargs)
     self._config = self.load_default_config(default_config_path)
     update_config(self._config, config)
-    self.name = self.config.get("name","") + '_' + self._config['model_config']['name'] 
+    self.name = self.config.get("name","") + self._config['model_config']['name'] 
 
   @property
   def config(self) -> dict:
