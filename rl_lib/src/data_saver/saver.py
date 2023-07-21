@@ -32,7 +32,7 @@ class Saver:
 
   def init_copy_dir(self):
     if self.copy_path != "": 
-      self.copy_path = self.copy_path + self.algo_name + "/" + self.name
+      self.copy_path = self.copy_path + self.algo_name + "/"
       if not os.path.isdir(self.copy_path):
           os.makedirs(self.copy_path)
       
