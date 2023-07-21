@@ -24,6 +24,10 @@ class ExplorationManager(Base_Explore):
   def config(self):
     return self.config
     
+  @property
+  def name(self):
+    return self.strategy.name  
+    
   def load(self, path):
     self.strategy.load(path)    
     
