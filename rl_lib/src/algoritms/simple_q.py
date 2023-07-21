@@ -6,12 +6,12 @@ from rl_lib.rl_lib.src.replay_buffers.replay_buffer import ReplayBuffer
 from rl_lib.rl_lib.src.explore_env.exploration_manager import ExplorationManager
 from rl_lib.rl_lib.src.data_saver.saver import Saver
 
-class SimpleQ(Base_Algo, Saver):
+class SimpleQ(Saver, Base_Algo, ):
   """Произовдит все вычисления необходимые для Q-learning
   """
-  def __init__(self, action_model: object, target_model: object, **config: dict):
+  def __init__(self, action_model: object, target_model: object, config: dict, **kwargs):
     config = link_data_inside_the_config(config)
-    super().__init__(action_model, target_model, **config)
+    super().__init__(action_model=action_model, target_model=target_model, **config['saver_config'], **kwargs)
 
     self.buffer = ReplayBuffer(**config.get("buffer_config", {}))
     self.exploration = ExplorationManager(**config.get("exploration_config", {}))
@@ -26,8 +26,6 @@ class SimpleQ(Base_Algo, Saver):
 
     self.batch_dims = -1
     self.ind_axis = -1
-
-    self.path = self.action_model.path
   
   def add(self, data, priority = None):
     """Добавляет переходы в буфер"""
