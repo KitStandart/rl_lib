@@ -1,4 +1,5 @@
 import os
+from shutil import copy, make_archive
 
 class Saver:
   """Хранит в себе пути сохранения этапа обучения и путь резервного копирования.
@@ -8,38 +9,17 @@ class Saver:
     path: str. Путь сохранения
     copy_path: str. Путь резервного копирования
   """
-  def __init__(self, name="unkown", path="", copy_path="", **kwargs):
+  def __init__(self, copy_path="", name="unkown", path="", **kwargs):
     super().__init__(**kwargs)
-    self.original_path = os.getcwd()
-    self.name = name
     self.copy_path = copy_path
+    self.name = name
+    self.original_path = os.getcwd()
     self.path = path
 
     self.validate_path()
     
-    self.init_save_dir()
     self.init_copy_dir()
-
-  def init_save_dir(self):
-    if not os.path.isdir(self.original_path+"/models/"):
-        os.mkdir(self.original_path+"/models/")
-    self.path = self.original_path + "/models/" + self.name + '/'
-    # if not os.path.isdir(self.path):
-    #     os.mkdir(self.path)  
-    self.save_path = self.path + self.name
-
-  def init_copy_dir(self):
-    if self.copy_path != "" and not os.path.isdir(self.copy_path+"/models/"):
-        os.mkdir(self.copy_path+"/models/")
-        
-    self.copy_path = self.copy_path +"/models/" + self.name +'/'
-    if self.copy_path != "/models/" + self.name +'/' and not os.path.isdir(self.copy_path):
-        os.mkdir(self.copy_path)
-
-  def validate_path(self):
-    assert type(self.path) == str, "Неверный тип аргумента"
-    assert type(self.copy_path) == str, "Неверный тип аргумента"
-    assert type(self.name) == str, "Неверный тип аргумента"
+    self.init_save_dir()
 
   @property
   def get_save_path(self):
@@ -47,5 +27,33 @@ class Saver:
   
   @property
   def get_copy_path(self):
-    if self.copy_path != "/models/" + self.name +'/': return self.copy_path 
-    else: return "Path is not defined"
+    if self.copy_path != "": return self.copy_path 
+    else: return "Path is not defined"  
+
+  def init_copy_dir(self):
+    if self.copy_path != "": 
+      self.copy_path = self.copy_path + "/models/" + self.name + "/"
+      if not os.path.isdir(self.copy_path):
+          os.makedirs(self.copy_path)
+      
+  def init_save_dir(self):
+    """Создает путь сохранения и директорию сохранения"""
+    if self.path == "": self.path = self.original_path + "/models/" + self.name + "/"
+    else: self.path = self.path + "/models/" + self.name + "/"
+    if not os.path.isdir(self.path):
+        os.makedirs(self.path)
+
+  def make_copy(self):
+    """Резервное копирование архива директории"""
+    copy(self.path +'/' + self.agent.model_name+'.zip', self.copy_path)
+
+  def make_archive(self):
+    """Создает архив директории"""
+    make_archive(base_name=self.name, format='zip', root_dir=self.path)
+    
+  def validate_path(self):
+    assert isinstance(self.path, str), "Неверный тип аргумента, должно быть str"
+    assert isinstance(self.copy_path, str), "Неверный тип аргумента, должно быть str"
+    assert isinstance(self.name, str), "Неверный тип аргумента, должно быть str"
+
+ 
