@@ -1,17 +1,68 @@
-from .saver import Saver
-from rl_lib.rl_lib.src.algoritms.tests.test_simpe_q import get_directory_structure, compare_directory_structures
+from ..simple_q import SimpleQ
+from rl_lib.rl_lib.src.models.model import Model
 
-class Test_Saver:
-  def __init__(self, **kwargs):
-    self.saver = Saver(**kwargs)
+import os
+
+class Simple_Model(Model):
+  def __init__(self, config = {},**kwargs):
+    super().__init__(model_config = config.get('model_config', {}), config = config,  default_config_path=__file__, **kwargs)
+  
+  def _prediction_processing(self, input_data):
+    pass
+
+  def _update_next_state(self, state, action):
+    pass
+
+  def initial_state(self):
+    pass
     
-def test_init(self, path, copy_path):
-  self.check_structure(self.saver.path, path)
-  self.check_structure(self.saver.copy_path, copy_path)
-  print("Тест пройден успешно")
+  @staticmethod
+  def create_model(input_shape: tuple, action_space: int):
+    pass
 
-def check_structure(self, real_path, corrrect_path):
-  real_structure = get_directory_strucrure(real_path)
-  assert real_path != corrrect_path, "Пути не совпадают"
-  correct_structure = {corrrect_path: {self.name: None}}
-  assert compare_directory_structures(real_structure, correct_structure), "Каталоги разные"
+  @staticmethod
+  def create_model_with_conv(input_shape: tuple, action_space: int):
+    pass
+
+class Test_Simple_Q:
+  def __init__(self, config):
+    action_model = Simple_Model(config, name = "Simple_Model_" + config['model_config'].get("name", ""))
+    target_model = Simple_Model(config, name = "Simple_Model_" + config['model_config'].get("name", ""))
+    self.simple_q = SimpleQ(action_model, target_model, **config)
+
+  def test_save(self):
+    self.simple_q.save()
+    real_structure = get_directory_structure(self.simple_q.path)
+    assert self.simple_q.path != self.simple_q.config['data_saver']['path'], "Пути не совпадают"
+    correct_structure = {self.simple_q.name: 
+                         {
+                           self.simple_q.exploration.name + ".data": None, 
+                           self.simple_q.buffer.name + ".data": None,
+                           self.simple_q.action_model.name + ".h5": None,
+                           self.simple_q.target_model.name + ".h5": None,
+                         }
+                        }
+    assert compare_directory_structures(real_structure, correct_structure), "Каталоги разные"
+
+def compare_directory_structures(dir_structure1, dir_structure2):
+    if dir_structure1.keys() != dir_structure2.keys():
+        return False
+
+    for key in dir_structure1.keys():
+        if isinstance(dir_structure1[key], dict) and isinstance(dir_structure2[key], dict):
+            if not compare_directory_structures(dir_structure1[key], dir_structure2[key]):
+                return False
+        elif dir_structure1[key] != dir_structure2[key]:
+            return False
+
+    return True
+  
+def get_directory_structure(directory):
+    structure = {}
+    for item in os.listdir(directory):
+        item_path = os.path.join(directory, item)
+        if os.path.isdir(item_path):
+            structure[item] = get_directory_structure(item_path)
+        else:
+            structure[item] = None
+    return structure
