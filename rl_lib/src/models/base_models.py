@@ -1,4 +1,4 @@
-from ..data_saver.data_saver import Saver
+from ..data_saver.saver import Saver
 from ..data_saver.utils import load_default_config
 from ..algoritms.utils import update_config
 
