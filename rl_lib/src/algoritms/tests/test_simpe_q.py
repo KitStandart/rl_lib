@@ -44,7 +44,8 @@ class Test_Simple_Q:
                         }
     assert compare_directory_structures(real_structure, correct_structure), "Каталоги разные"
 
-def compare_directory_structures(dir_structure1, dir_structure2):
+def compare_directory_structures(dir_structure1: dict, dir_structure2: dict) -> bool:
+  """Проверяет одинаковые ли структуры каталогов"""
     if dir_structure1.keys() != dir_structure2.keys():
         return False
 
@@ -57,12 +58,13 @@ def compare_directory_structures(dir_structure1, dir_structure2):
 
     return True
   
-def get_directory_structure(directory):
+def get_directory_structure(path: str) -> dict:
+    """Получает всю структуру переданного каталога"""
     structure = {}
-    for item in os.listdir(directory):
-        item_path = os.path.join(directory, item)
-        if os.path.isdir(item_path):
-            structure[item] = get_directory_structure(item_path)
-        else:
-            structure[item] = None
+    for dirpath, dirnames, filenames in os.walk(path):
+        current_level = structure
+        for dirname in dirpath.split(os.sep):
+            current_level = current_level.setdefault(dirname, {})
+        for filename in filenames:
+            current_level[filename] = None
     return structure
