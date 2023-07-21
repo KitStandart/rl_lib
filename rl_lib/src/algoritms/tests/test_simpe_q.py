@@ -26,8 +26,9 @@ class Simple_Model(Model):
 
 class Test_Simple_Q:
   def __init__(self, config):
-    action_model = Simple_Model(config, name = "Simple_Model_" + config['model_config'].get("name", ""))
-    target_model = Simple_Model(config, name = "Simple_Model_" + config['model_config'].get("name", ""))
+    action_model = Simple_Model(config, name = "Simple_action_Model_" + config['model_config'].get("name", ""))
+    target_model = Simple_Model(config, name = "Simple_target_Model_" + config['model_config'].get("name", ""))
+    config.update(action_model.config)
     self.simple_q = SimpleQ(action_model, target_model, **config)
 
   def test_save(self):
@@ -46,17 +47,17 @@ class Test_Simple_Q:
 
 def compare_directory_structures(dir_structure1: dict, dir_structure2: dict) -> bool:
   """Проверяет одинаковые ли структуры каталогов"""
-    if dir_structure1.keys() != dir_structure2.keys():
-        return False
+  if dir_structure1.keys() != dir_structure2.keys():
+      return False
 
-    for key in dir_structure1.keys():
-        if isinstance(dir_structure1[key], dict) and isinstance(dir_structure2[key], dict):
-            if not compare_directory_structures(dir_structure1[key], dir_structure2[key]):
-                return False
-        elif dir_structure1[key] != dir_structure2[key]:
-            return False
+  for key in dir_structure1.keys():
+      if isinstance(dir_structure1[key], dict) and isinstance(dir_structure2[key], dict):
+          if not compare_directory_structures(dir_structure1[key], dir_structure2[key]):
+              return False
+      elif dir_structure1[key] != dir_structure2[key]:
+          return False
 
-    return True
+  return True
   
 def get_directory_structure(path: str) -> dict:
     """Получает всю структуру переданного каталога"""
