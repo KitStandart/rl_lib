@@ -9,9 +9,8 @@ class Saver:
     path: str. Путь сохранения
     copy_path: str. Путь резервного копирования
   """
-  def __init__(self, copy_path="", name="", path="", **kwargs):
-    print("init")
-    super().__init__()
+  def __init__(self, algo_name="None", copy_path="", name="", path="", **kwargs):
+    self.algo_name = algo_name
     self.copy_path = copy_path
     self.name = name
     self.original_path = os.getcwd()
@@ -33,13 +32,13 @@ class Saver:
 
   def init_copy_dir(self):
     if self.copy_path != "": 
-      self.copy_path = self.copy_path + self.name
+      self.copy_path = self.copy_path + self.algo_name + "/" + self.name
       if not os.path.isdir(self.copy_path):
           os.makedirs(self.copy_path)
       
   def init_save_dir(self):
     """Создает путь сохранения и директорию сохранения"""
-    if self.path == "": self.path = self.original_path + "/models/" + self.name
+    if self.path == "": self.path = self.original_path + "/models/" + self.algo_name + "/" + self.name
     else: self.path = self.path + self.name
     if not os.path.isdir(self.path):
         os.makedirs(self.path)
@@ -53,9 +52,10 @@ class Saver:
     make_archive(base_name=self.name, format='zip', root_dir=self.path)
     
   def validate_path(self):
-    assert isinstance(self.path, str), "Неверный тип аргумента, должно быть str"
+    assert isinstance(self.algo_name, str), "Неверный тип аргумента, должно быть str"
     assert isinstance(self.copy_path, str), "Неверный тип аргумента, должно быть str"
     assert isinstance(self.name, str), "Неверный тип аргумента, должно быть str"
+    assert isinstance(self.path, str), "Неверный тип аргумента, должно быть str"
     if len(self.path) > 0: assert self.path[-1] == "/", "В конце пути должен быть /"
     if len(self.copy_path) > 0: assert self.copy_path[-1] == "/", "В конце пути должен быть /"
 
