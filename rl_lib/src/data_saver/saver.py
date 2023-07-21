@@ -45,7 +45,7 @@ class Saver:
 
   def make_copy(self):
     """Резервное копирование архива директории"""
-    copy(self.path +'/' + self.agent.model_name+'.zip', self.copy_path)
+    copy(self.path +'/' + self.name+'.zip', self.copy_path)
 
   def make_archive(self):
     """Создает архив директории"""
