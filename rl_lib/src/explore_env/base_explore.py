@@ -7,6 +7,11 @@ class Base_Explore(abc.ABC):
   """
   def __init__():
     pass
+
+  @property
+  @abc.abstractmethod
+  def name(self):
+    """Возвращает имя стратегии"""
   
   @abc.abstractmethod
   def reset(self, ) -> None:
