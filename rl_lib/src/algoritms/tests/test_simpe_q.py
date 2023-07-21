@@ -1,11 +1,36 @@
-from ..algoritms.simple_q import SimpleQ
+from ..simple_q import SimpleQ
+from rl_lib.rl_lib.src.models.model import Model
+
 import os
 
-class Test_SimpleQ:
-  def __init__(self, config):
-    self.simple_q = SimpleQ(**config)
+class Simple_Model(Model):
+  def __init__(self, config = {},**kwargs):
+    super().__init__(model_config = config.get('model_config', {}), config = config,  default_config_path=__file__, **kwargs)
+  
+  def _prediction_processing(self, input_data):
+    pass
 
-  def test_save:
+  def _update_next_state(self, state, action):
+    pass
+
+  def initial_state(self):
+    pass
+    
+  @staticmethod
+  def create_model(input_shape: tuple, action_space: int):
+    pass
+
+  @staticmethod
+  def create_model_with_conv(input_shape: tuple, action_space: int):
+    pass
+
+class Test_Simple_Q:
+  def __init__(self, config):
+    action_model = Simple_Model(config, name = "Simple_Model_" + config['model_config'].get("name", ""))
+    target_model = Simple_Model(config, name = "Simple_Model_" + config['model_config'].get("name", ""))
+    self.simple_q = SimpleQ(action_model, target_model**config)
+
+  def test_save(self):
     self.simple_q.save()
     real_structure = get_directory_strucrure(self.simple_q.path)
     assert self.simple_q.path != self.simple_q.config['data_saver']['path'], "Пути не совпадают"
