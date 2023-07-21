@@ -24,9 +24,25 @@ class Epsilon_Greedy(Base_Explore):
         assert type(action_space) == int, "Пространство действий должно быть int"
         self.action_space = action_space 
         self.axis = axis
-        self.name = "epsilon_greedy_strategy"
+        self._name = "epsilon_greedy_strategy"
         self.reset()
 
+    def __call__(self, Q):
+        self.eps = max(self.eps_min, self.eps_max - (self.eps_max-self.eps_min) * self.count/self.eps_desay_steps)
+        self.count += 1
+        return self.get_action(self.eps, Q)
+
+    def get_action(self, eps, action):
+        if np.random.random() < eps: return  np.random.randint(self.action_space)
+        else: return argmax(Q, axis=self.axis, output_type=int32)
+
+    def load(self, path):
+        self.__dict__ = load_data(path+self.name)
+        
+    @property
+    def name(self):
+        return self._name
+        
     def reset(self, ):
         self.count = 0
         self.eps = self.eps_max
@@ -34,17 +50,7 @@ class Epsilon_Greedy(Base_Explore):
     def save(self, path):
         save_data(path+self.name, self.__dict__)
 
-    def load(self, path):
-        self.__dict__ = load_data(path+self.name)
-
-    def __call__(self, Q):
-        self.eps = max(self.eps_min, self.eps_max - (self.eps_max-self.eps_min) * self.count/self.eps_desay_steps)
-        self.count += 1
-        return self.get_action(self.eps, Q)
-
     def test(self, Q):
         return self.get_action(self.eps_test, Q)
 
-    def get_action(self, eps, action):
-        if np.random.random() < eps: return  np.random.randint(self.action_space)
-        else: return argmax(Q, axis=self.axis, output_type=int32)
+    
