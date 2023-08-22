@@ -2,7 +2,7 @@ import tensorflow as tf
 import abc
 
 from .base_models import ModelNN, ModelIO, BaseModel
-from ..optimizers.optimizers import get_optimizer
+from ..optimizers.optimizer import get_optimizer
 
 class Model(ModelNN, ModelIO, BaseModel, abc.ABC):
   """Абстрактный класс модели, который соединяет все методы классов ModelNN, ModelIO, BaseModel"""
