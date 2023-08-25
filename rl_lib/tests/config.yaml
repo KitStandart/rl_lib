@@ -40,6 +40,6 @@ exploration_config:
     eps_test: 0.001
 
 data_saver:
-  path: "C:\\Users\\imars\\OneDrive\\Рабочий стол\\Проекты\\rl_lib\\rl_lib\\tests\\models/"
+  path: "..\\rl_lib\\rl_lib\\tests\\models/"
   copy_path: ""
     
