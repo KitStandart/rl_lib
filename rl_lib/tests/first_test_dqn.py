@@ -19,7 +19,7 @@ def create_model():
     
     return tf.keras.Model(inputs=input_layer, outputs=dence_out)
 
-config = load_default_config("C:\\Users\\imars\\OneDrive\\Рабочий стол\\Проекты\\rl_lib\\rl_lib\\tests/")
+config = load_default_config("..rl_lib\\rl_lib\\tests/")
 config['model_config']['model'] = create_model()
 config['model_config']['input_shape'] = env.observation_space.shape
 config['model_config']['action_space'] = env.action_space.n
