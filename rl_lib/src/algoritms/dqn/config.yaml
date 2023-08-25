@@ -18,7 +18,7 @@ optimizer_config:
     learning_rate: 0.0001
     epsilon: 0.001
     clipnorm: 1.0
-  cutom_optimizer: None
+  custom_optimizer: None
 
 buffer_config:
   size: 100000

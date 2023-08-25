@@ -46,6 +46,10 @@ class ReplayBuffer:
   def name(self):
     return self.buffer.name
 
+  @property
+  def real_size(self):
+    return self.buffer.real_size
+  
   def sample(self, *args):
     return self.buffer.sample(*args)
 

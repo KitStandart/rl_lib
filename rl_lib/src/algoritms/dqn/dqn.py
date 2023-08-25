@@ -8,8 +8,18 @@ class DQN_Model(Model):
   def __init__(self, config = {},**kwargs):
     super().__init__(model_config = config.get('model_config', {}), config = config,  default_config_path=__file__, **kwargs)
   
-  def _prediction_processing(self, input_data):
-    pass
+  def _prediction_processing(self, inputs: tf.Tensor, **kwargs):
+    mask = self.make_mask(kwargs['action'])
+    if len(inputs.shape) != len(mask.shape): mask = tf.expand_dims(mask, -1)
+    return tf.reduce_sum(tf.multiply(inputs, mask), axis=kwargs['batch_dims'])
+  
+  def loss(self, target: tf.Tensor, predict: tf.Tensor) -> tf.Tensor:
+    """Вычисляет и возвращает потери в соответствии с функцией потерь"""
+    return tf.math.squared_difference(target, predict)
+
+  def make_mask(self, action) -> tf.Tensor:
+    """Создает маску по действиям """
+    return tf.one_hot(action, self.output_spec()[-1])
 
   def _update_next_state(self, state, action):
     pass

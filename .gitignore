@@ -2,3 +2,8 @@ __pycache__
 rl_lib.egg-info
 venv
 
+#папка с сохраненнымим моделями во время тестирования алгоритмов 
+rl_lib/tests/models/
+
+#jupiter notebooks
+*.ipynb

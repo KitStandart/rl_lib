@@ -1,5 +1,6 @@
 import tensorflow as tf
 import abc
+from tensorflow.keras.models import clone_model
 
 from .base_models import ModelNN, ModelIO, BaseModel
 from ..optimizers.optimizer import get_optimizer
@@ -27,7 +28,7 @@ class Model(ModelNN, ModelIO, BaseModel, abc.ABC):
   def initial_model(self):
     """Инициализирует модель в соответствии с типом алгоритма"""
     if str(self.config['model_config']['model']) == 'None': model = self._initial_model()
-    else:  model = self.config['model_config']['model']
+    else:  model = clone_model(self.config['model_config']['model'])
     optimizer = self.config.get("optimizer_config")
     optimizer = get_optimizer(**optimizer)
     self.set_new_model(model, optimizer)
@@ -39,7 +40,8 @@ class Model(ModelNN, ModelIO, BaseModel, abc.ABC):
     self.model = tf.keras.models.load_model(path+self.name+'.h5')
     
   def output_spec(self):
-    return self.model.layers[-1].input_shape[0]
+    """Возвращает кортеж размера выходных данных Модели"""
+    return self.model.layers[-1].output_shape
 
   def save(self, path):
     self.model.save(path+self.name+'.h5')

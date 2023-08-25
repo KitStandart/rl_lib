@@ -72,28 +72,33 @@ class ModelNN(abc.ABC):
     return self.model(inputs)
   
   @abc.abstractmethod
-  def _prediction_processing(self, inputs: tf.Tensor, mask: tf.Tensor) -> tf.Tensor:
+  def _prediction_processing(self, inputs: tf.Tensor, **kwargs) -> tf.Tensor:
     """Обрабатывает выходы модели перед вычислением лоссов
     Args:
       inputs: tf.Tensor(dtype=tf.float32)
-      mask: tf.Tensor(dtype=tf.float32)
     Returns
       outputs: tf.Tensor(dtype=tf.float32
     """
     return inputs
 
-  def prediction_processing(self, inputs: tf.Tensor, mask: tf.Tensor) -> tf.Tensor:
+  @abc.abstractclassmethod
+  def loss(self, target: tf.Tensor, predict: tf.Tensor) -> tf.Tensor:
+     """Вычисляет и возвращает потери в соответствии с функцией потерь"""
+
+  @abc.abstractclassmethod
+  def make_mask(self) -> tf.Tensor:
+    """Создает и возвращает маску для выходов с модели"""
+
+  def prediction_processing(self, inputs: tf.Tensor, **kwargs) -> tf.Tensor:
     """Обрабатывает выходы модели перед вычислением лоссов
     Args:
       inputs: tf.Tensor(dtype=tf.float32)
-      mask: tf.Tensor(dtype=tf.float32)
     Returns
       outputs: tf.Tensor(dtype=tf.float32
     """
     inputs = inputs[0] if isinstance(inputs, list) else inputs
-    if inputs.shape != len(mask.shape): mask = tf.expand_dims(mask, -1)
-    return self._prediction_processing(inputs)
-
+    return self._prediction_processing(inputs, **kwargs)
+  
   def set_new_model(self, model: tf.keras.Model, optimizer: tf.keras.optimizers, jit_compile=True) -> None:
     self.model = model
     self.model.compile(optimizer=optimizer, jit_compile=jit_compile)
@@ -135,8 +140,8 @@ class ModelNN(abc.ABC):
       """
       with tf.GradientTape(persistent=False) as tape:
           Q = self.model(kwargs['state'], training=True)
-          Q = self.prediction_processing(Q, kwargs['mask'])
-          if Q.shape != len(kwargs['Qtarget'].shape): Q = tf.expand_dims(Q, -1)
+          Q = self.prediction_processing(Q, **kwargs)
+          if len(Q.shape) != len(kwargs['Qtarget'].shape): Q = tf.expand_dims(Q, -1)
 
           td_error = kwargs['Qtarget'] - Q
           loss = self.loss(kwargs['Qtarget'], Q)*kwargs.get('weights', 1.0)

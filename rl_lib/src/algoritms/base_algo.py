@@ -32,8 +32,12 @@ class Base_Algo(Saver, abc.ABC):
 
   @abc.abstractclassmethod
   def get_action(self, observation) -> float:
-     """Возвращает действие на основе наблюдения"""
+    """Возвращает действие на основе наблюдения с учетом исследования"""
 
+  @abc.abstractclassmethod
+  def get_test_action(self, observation) -> float:
+    """Возвращает действие на основе наблюдения без исследования"""
+     
   @abc.abstractclassmethod
   def get_gradients(self) -> tf.Tensor:
     """Вычисляет градиенты и возвращает их"""
@@ -64,6 +68,7 @@ class Base_Algo(Saver, abc.ABC):
     
   @tf.function(reduce_retracing=None, jit_compile=None, experimental_autograph_options=None)
   def copy_weights(self,) -> tf.constant:
+      """Копирует веса из модели действия в целевую модель"""
       for a_w, t_w in zip(self.action_model.weights, self.target_model.weights):
           new_weights = tf.add(tf.multiply(self.tau, a_w), tf.multiply((1-self.tau), t_w))
           t_w.assign(tf.identity(new_weights))

@@ -18,8 +18,8 @@ class Epsilon_Greedy(Base_Explore):
     """
     def __init__(self, eps_decay_steps=1e6, eps_max=1.0, eps_min=1e-1, eps_test=1e-3, action_space=None, axis=-1):
         self.eps_desay_steps = eps_decay_steps
-        self.eps_min = eps_max
-        self.eps_max = eps_min
+        self.eps_min = eps_min
+        self.eps_max = eps_max
         self.eps_test = eps_test
         assert type(action_space) == int, "Пространство действий должно быть int"
         self.action_space = action_space 

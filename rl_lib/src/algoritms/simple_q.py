@@ -23,11 +23,17 @@ class SimpleQ(Base_Algo, ):
     self.priority = self.config['model_config'].get("priority")
     self.tau = self.config['model_config'].get("tau")
 
-    self.batch_dims = -1
+    self.recurrent = False
+    self.batch_dims = 1
     self.ind_axis = -1
   
-  def add(self, data, priority = None):
-    """Добавляет переходы в буфер"""
+  def add(self, data: tuple, priority = None) -> None:
+    """
+    Добавляет переходы в буфер
+    Аргументы:
+      data: tuple(state, action, reward, done, next_state)
+      priority: np.array (только для приоритетных буферов)
+    """
     self.buffer.add(data, priority)
 
   def calculate_double_q(self, **kwargs):
@@ -39,7 +45,8 @@ class SimpleQ(Base_Algo, ):
     else: Qtarget = self.get_best_action(Qaction, Qtarget)
     return Qtarget
     
-  def calculate_gradients(self, **batch):
+  def calculate_gradients(self, batch = None):
+    if batch == None: batch = self.choice_model_for_double_calculates(**batch)
     batch = self.choice_model_for_double_calculates(**batch)
     return self.action_model.calculate_gradients(**batch) if batch['p_double'] > 0.5 else self.target_model.update_weights.calculate_gradients(**batch)
     
@@ -57,7 +64,7 @@ class SimpleQ(Base_Algo, ):
                  jit_compile=False,
                  experimental_autograph_options = tf.autograph.experimental.Feature.ALL)
   def calculate_target(self, **kwargs):
-    Qtarget = self.calculate_best_acitons(**kwargs)
+    Qtarget = self.calculate_new_best_action(**kwargs)
     dones = tf.ones((self.batch_size,), dtype=tf.dtypes.float32) if not self.recurrent else tf.ones((self.batch_size, kwargs.get('trace_length', 10)), dtype=tf.dtypes.float32)
     dones = dones - kwargs['done']
     Qtarget = kwargs['reward'] + (self.discount_factor**self.n_step) * Qtarget * dones
@@ -65,15 +72,28 @@ class SimpleQ(Base_Algo, ):
         Qtarget = Qtarget[:, kwargs.get('recurrent_skip', 10):]
     return Qtarget
 
+  def check_fullness_buffer(self):
+    """Проверяет наполненость буфера, возвращает true если в буфере элементов больше батча"""
+    if self.buffer.real_size > self.batch_size: return True
+    else: return False
+
   def choice_model_for_double_calculates(self, **batch):
     batch['p_double'] = tf.random.uniform((1,), minval = 0.0, maxval = 1.0) if self.double_network else 1.
-    batch['Qtarget'] = self.calculate_Qtarget(**batch)
+    batch['Qtarget'] = self.calculate_target(**batch)
     return batch
   
-  def get_action(self, observation: tf.Tensor) -> float:
-    """Возвращает действие на основе наблюдения"""
+  def _get_action(self, observation: tf.Tensor) -> tf.Tensor:
+    """Возвращает предсказания всех действий на основе наблюдения"""
     action = self.action_model(self.action_model.check_input_shape(observation))
     return Base_Algo.squeeze_predict(action)
+  
+  def get_action(self, observation: tf.Tensor) -> float:
+    """Возвращает действие на основе наблюдения с учетом исследования"""
+    return int(self.exploration(self._get_action(observation)))
+
+  def get_test_action(self, observation: tf.Tensor) -> float:
+    """Возвращает действие на основе наблюдения без исследования"""
+    return int(self.exploration.test(self._get_action(observation)))
   
   def get_batch(self):
     """Получает батч из буфера"""
@@ -100,20 +120,22 @@ class SimpleQ(Base_Algo, ):
     self.target_model.load(self.path)
     self.buffer.load(self.path)
     self.exploration.load(self.path)  
-
+  
   def reset(self) -> None:
     """Сбрасывает внутренние данные модели"""  
     self.buffer.reset()
     self.exploration.reset()
     self.initial_model()
     
-  def _train_step(self) -> dict:
+  def _train_step(self, **batch) -> dict:
     """Вспомогательная train_step"""
     batch = self.choice_model_for_double_calculates(**batch)
+    batch['batch_dims'] = self.batch_dims
     return self.action_model.update_weights(**batch) if batch['p_double'] > 0.5 else self.target_model.update_weights(**batch)
     
   def train_step(self) -> np.array:
     """Вычисляет полный обучающий шаг"""
+    if not self.check_fullness_buffer(): return 0
     batch = self.get_batch()
     result = self._train_step(**batch)
     td_error = result['td_error'].numpy()
@@ -123,7 +145,7 @@ class SimpleQ(Base_Algo, ):
     if self.tau != 1:
       _ = self.copy_weights()
     return np.mean(td_error)
-      
+  
   def save(self) -> None:
     """Сохраняет алгоритм"""
     self.action_model.save(self.path)
