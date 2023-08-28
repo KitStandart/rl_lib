@@ -83,9 +83,9 @@ class SimpleQ(Base_Algo, ):
     return batch
   
   def _get_action(self, observation: tf.Tensor) -> tf.Tensor:
-    """Возвращает предсказания всех действий на основе наблюдения"""
-    action = self.action_model(self.action_model.check_input_shape(observation))
-    return Base_Algo.squeeze_predict(action)
+    """Возвращает ценность дейтсвий Q(s,a) всех действий на основе наблюдения"""
+    action = self.sample_action(self.action_model.check_input_shape(observation))
+    return action
   
   def get_action(self, observation: tf.Tensor) -> float:
     """Возвращает действие на основе наблюдения с учетом исследования"""

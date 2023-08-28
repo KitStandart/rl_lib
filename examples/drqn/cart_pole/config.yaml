@@ -2,7 +2,7 @@
 
 model_config:
   model: None
-  name: ""
+  name: "_cart_pole"
   input_shape: None
   action_space: None
   lstm_size: 64
@@ -46,6 +46,6 @@ exploration_config:
     action_space: None
 
 data_saver:
-  path: "..\\rl_lib\\rl_lib\\tests\\models/"
+  path: "..\\rl_lib\\examples\\drqn\\cart_pole/"
   copy_path: ""
     

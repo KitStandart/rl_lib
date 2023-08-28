@@ -20,7 +20,7 @@ def create_model():
     
     return tf.keras.Model(inputs=input_layer, outputs=dence_out)
 
-config = load_default_config(__file__)
+config = load_default_config("..\\rl_lib\\rl_lib\\examples\\dqn\\cart_pole/")
 config['model_config']['model'] = create_model()
 config['model_config']['input_shape'] = env.observation_space.shape
 config['model_config']['action_space'] = env.action_space.n

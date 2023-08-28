@@ -77,14 +77,16 @@ class Base_Algo(Saver, abc.ABC):
   @tf.function(reduce_retracing=True,
                 jit_compile=True,
                 experimental_autograph_options = tf.autograph.experimental.Feature.ALL)
-  def sample_action(self, state) -> tf.Tensor or list:
+  def sample_action(self, state: tf.Tensor | tuple) -> tf.Tensor | list:
+      """Возвращает предсказания модели на основе текущих наблюдений"""
       predict = self.action_model(state)
-      if isinstance(predict) == list: 
+      if isinstance(predict, list): 
         return self.squeeze_predict(predict[0]), *predict[1:]
       return self.squeeze_predict(predict)
 
   @tf.function(reduce_retracing=None, jit_compile=None, experimental_autograph_options=None)
-  def set_weights(self, target_weights) -> tf.constant:
+  def set_weights(self, target_weights: list) -> tf.constant:
+      """Устанавливает переданные как аргумент веса в основную сеть"""
       for a_w, t_w in zip(self.action_model.weights, target_weights):
         a_w.assign(tf.identity(t_w))
       return tf.constant(1)

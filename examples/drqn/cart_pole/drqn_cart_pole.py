@@ -6,25 +6,31 @@ from tensorflow.keras import layers
 import tensorflow as tf
 from pprint import pprint
 
-from rl_lib.src.algoritms.dqn.dqn import DQN
+from rl_lib.src.algoritms.drqn.drqn import DRQN
 from rl_lib.src.data_saver.utils import load_default_config
 
 env = gym.make('CartPole-v0')
 
-def create_model():
-    """Создает модель tf.keras.Model, архитектура DQN"""
-    input_layer = layers.Input(shape=env.observation_space.shape, )
-    dence_layer1 = layers.Dense(32, activation='relu')(input_layer)
-    dence_layer2 = layers.Dense(32, activation='relu')(dence_layer1)
-    dence_out = layers.Dense(env.action_space.n, activation=None)(dence_layer2)
-    
-    return tf.keras.Model(inputs=input_layer, outputs=dence_out)
+def create_model(lstm_size = 32):
+    """Создает модель tf.keras.Model, архитектура DRQN"""
 
-config = load_default_config(__file__)
-config['model_config']['model'] = create_model()
+    input_layer = layers.Input(shape= (None, *env.observation_space.shape), )
+    h_t_input = layers.Input(shape=(lstm_size, ), ) 
+    c_t_input = layers.Input(shape=(lstm_size, ), ) 
+    
+
+    lstm = layers.LSTM(lstm_size, activation='tanh', recurrent_activation='sigmoid', return_sequences = True, 
+                          return_state=True, stateful = False)(input_layer, initial_state = [h_t_input, c_t_input])
+    dence_layer1 = layers.Dense(32, activation='relu')(lstm[0])
+    dence_out = layers.Dense(env.action_space.n, activation=None)(dence_layer1)
+    
+    return tf.keras.Model(inputs=[input_layer, h_t_input, c_t_input], outputs=[dence_out, lstm[1], lstm[2]])
+
+config = load_default_config("..\\rl_lib\\rl_lib\\examples\\drqn\\cart_pole/")
+config['model_config']['model'] = create_model(lstm_size=config['model_config']['lstm_size'])
 config['model_config']['input_shape'] = env.observation_space.shape
 config['model_config']['action_space'] = env.action_space.n
-algo = DQN(config)
+algo = DRQN(config)
 
 pprint(algo.config)
 
@@ -48,6 +54,7 @@ def run(algo):
         start_time = time.time()
 
         observation, info = env.reset()
+        algo.initial_state()
         episode_reward = 0
         for step in range(1, steps):
             action = algo.get_action(observation)
@@ -69,6 +76,7 @@ def run(algo):
         #testing algoritm perfomans
         if episode%test_frequency == 0:
             observation, info = env.reset()
+            algo.initial_state()
             episode_test_reward = 0
             for test_step in range(1, test_steps):
                 action = algo.get_test_action(observation)

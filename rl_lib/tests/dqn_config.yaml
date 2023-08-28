@@ -1,11 +1,10 @@
-#default DQN config
+#CartPole DQN config
 
 model_config:
   model: None
-  name: ""
+  name: "_test_cart_pole"
   input_shape: None
   action_space: None
-  lstm_size: 64
   discount_factor : 0.9
   n_step: 1
   batch_size: 32
@@ -24,10 +23,6 @@ optimizer_config:
 buffer_config:
   size: 10000
   priority: False
-  recurrent: True
-  trace_length: 15
-  recurrent_skip: 5
-  n_step: None
   discount_factor : None
   eps: None
   alpha: None
@@ -43,7 +38,6 @@ exploration_config:
     eps_max: 1.0
     eps_min: 0.01
     eps_test: 0.001
-    action_space: None
 
 data_saver:
   path: "..\\rl_lib\\rl_lib\\tests\\models/"
