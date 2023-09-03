@@ -48,7 +48,7 @@ class SimpleQ(Base_Algo, ):
   def calculate_gradients(self, batch = None):
     if batch == None: batch = self.choice_model_for_double_calculates(**batch)
     batch = self.choice_model_for_double_calculates(**batch)
-    return self.action_model.calculate_gradients(**batch) if batch['p_double'] > 0.5 else self.target_model.update_weights.calculate_gradients(**batch)
+    return self.action_model.calculate_gradients(**batch) if batch['p_double'] > 0.5 else self.target_model.calculate_gradients(**batch)
     
   def calculate_new_best_action(self, **kwargs) -> tf.Tensor:
     """Вычислеят новое лучшее действие для получения таргета"""
@@ -84,8 +84,7 @@ class SimpleQ(Base_Algo, ):
   
   def _get_action(self, observation: tf.Tensor) -> tf.Tensor:
     """Возвращает ценность дейтсвий Q(s,a) всех действий на основе наблюдения"""
-    action = self.sample_action(self.action_model.check_input_shape(observation))
-    return action
+    return self.sample_action(self.action_model.check_input_shape(observation))
   
   def get_action(self, observation: tf.Tensor) -> float:
     """Возвращает действие на основе наблюдения с учетом исследования"""
@@ -101,7 +100,9 @@ class SimpleQ(Base_Algo, ):
 
   def get_batch_and_td_error(self):
     batch = self.get_batch()
-    td_error = self.calculate_gradients(**batch)['td_error']
+    batch['batch_dims'] = self.batch_dims
+    batch['p_double'] = 1.
+    td_error = self.calculate_gradients(batch)['td_error']
     return {'td_error': td_error.numpy(), 'batch': batch}
     
   def get_best_action(self, Qaction, Qtarget):
@@ -112,7 +113,9 @@ class SimpleQ(Base_Algo, ):
   def get_gradients(self) -> tf.Tensor:
     """Вычисляет градиенты и возвращает их"""
     batch = self.get_batch()
-    return self.calculate_gradients(**batch)['gradients']
+    batch['batch_dims'] = self.batch_dims
+    batch['p_double'] = 1.
+    return self.calculate_gradients(batch)['gradients']
     
   def load(self, ) -> None:
     """Загружает алгоритм"""
@@ -163,7 +166,9 @@ def link_data_inside_the_config(config):
   discount_factor = config['model_config']['discount_factor']
   n_step = config['model_config']['n_step']
   action_space = config['model_config']['action_space']
+  priority = config['model_config']['priority']
 
+  config['buffer_config']['priority'] = priority
   config['buffer_config']['discount_factor'] = discount_factor
   config['buffer_config']['n_step'] = n_step
   config['exploration_config']['strategy_config']['action_space'] = action_space

@@ -1,15 +1,14 @@
-#default DQN config
+#CartPole DQN config
 
 model_config:
   model: None
-  name: ""
+  name: "_test_cart_pole"
   input_shape: None
   action_space: None
-  lstm_size: 64
   discount_factor : 0.9
   n_step: 1
   batch_size: 32
-  double_network: False
+  double_network: True
   priority: False
   tau: 1.0
   
@@ -23,24 +22,18 @@ optimizer_config:
 
 buffer_config:
   size: 10000
-  priority: False
-  recurrent: True
-  trace_length: 15
-  recurrent_skip: 5
-  n_step: None
-  discount_factor : None
-  eps: None
-  alpha: None
-  beta: None
-  beta_changing: None
-  beta_changing_curve: None
-  max_priority: None
+  eps: 0.01
+  alpha: 0.5
+  beta: 0.4
+  beta_changing: 0.0005
+  beta_changing_curve: 'linear'
+  max_priority: 0.1
 
 exploration_config:
-  strategy_name: "epsilon_greedy"
+  strategy_name: "soft_q"
   strategy_config:
-    eps_decay_steps: 5000
-    eps_max: 1.0
+    decay: 1.
+    tau: 0.1
     eps_min: 0.01
     eps_test: 0.001
     action_space: None

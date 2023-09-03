@@ -16,7 +16,7 @@ class Epsilon_Greedy(Base_Explore):
         action_spase: int, Размер пространтства действий
         axis: int, Ось вычислений
     """
-    def __init__(self, eps_decay_steps=1e6, eps_max=1.0, eps_min=1e-1, eps_test=1e-3, action_space=None, axis=-1):
+    def __init__(self, eps_decay_steps=1e6, eps_max=1.0, eps_min=1e-1, eps_test=1e-3, action_space=None, axis=-1, **kwargs):
         self.eps_desay_steps = eps_decay_steps
         self.eps_min = eps_min
         self.eps_max = eps_max

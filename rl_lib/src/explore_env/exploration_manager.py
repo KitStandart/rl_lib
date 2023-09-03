@@ -8,7 +8,7 @@ class ExplorationManager(Base_Explore):
     strategy_name: str, Название стратегии 
     strategy_config: dict, Параметры стратегии
   """
-  def __init__(self, strategy_name="epsilon_greedy", strategy_config = {}):
+  def __init__(self, strategy_name="epsilon_greedy", strategy_config = {}, **kwargs):
     self._config = {"strategy_name": strategy_name, "strategy_config": strategy_config}
     if strategy_name.lower() == "epsilon_greedy":
       self.strategy = Epsilon_Greedy(**strategy_config)

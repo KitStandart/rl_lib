@@ -1,6 +1,9 @@
 from tensorflow.keras.activations import softmax
 from tensorflow.math import argmax
 from tensorflow.dtypes import int32
+from tensorflow import expand_dims
+from tensorflow.math import log
+from tensorflow.random import categorical
 
 from .base_explore import Base_Explore
 from ..data_saver.utils import save_data, load_data
@@ -13,14 +16,17 @@ class Soft_Q(Base_Explore):
     tau: float, Больцмановская температура
     axis: int, Ось вычислений
   """
-  def __init__(self, tau=1.0, axis=-1):
+  def __init__(self, decay = 0, tau=1.0, axis=-1, **kwargs):
+    self.decay = decay
     self.tau = tau
     self.axis = axis
-    self.name = "soft_q_strategy"
+    self._name = "soft_q_strategy"
   
   def __call__(self, Q) -> int:
     """Возвращает действие в соответствии с стратегией исследования"""
-    return softmax(Q/self.tau, axis=self.axis)
+    probability = softmax(expand_dims(Q, 0)/self.tau, axis=self.axis)
+    self.tau = self.tau * self.decay
+    return categorical(log(probability), 1, dtype=int32)
 
   @property
   def name(self):

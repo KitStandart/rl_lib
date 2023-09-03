@@ -1,7 +1,8 @@
 from rl_lib.src.replay_buffers.replay_buffer import ReplayBuffer
 import os
 from shutil import rmtree
-
+from copy import deepcopy
+ 
 class Test_Replay_Buffer:
   """
   Производит тестирование буфера 
@@ -53,11 +54,28 @@ class Test_Replay_Buffer:
     print("Проверка сохранения буфера")
     print(f"Найдено {len(file_names)} файлов: ", *file_names)
     assert self.buffer.name in file_names, "Файл не найден, проверка не пройдена"
-    print('Успешно')
+    print('Успешно тест сохранения данных')
     
   def test_load(self):
     """Выполняет test_save, потом загружает и проверяет соответствуют ли загруженные файлы сохраненным"""
-    pass
+    self.buffer.save(self.path)
+    copy_buffer = deepcopy(self.buffer)
+
+    self.buffer.load(self.path)
+    assert self.check_load_data(copy_buffer.buffer.__dict__, self.buffer.buffer.__dict__), "Файлы загрузки не соответствуют настоящим файлам"
+    print("Успешный тест зарузки данных")
+
+  def check_load_data(self, real_data: dict, loaded_data: dict) -> bool:
+    for key, value in real_data.items():
+      if key == 'tree': continue
+      if key == 'trace_window': 
+        if not self.check_load_data(value.__dict__, loaded_data[key].__dict__): return False
+        continue
+      if key == 'data':
+        if loaded_data[key].all() != value.all(): return False
+        continue
+      if loaded_data[key] != value: return False
+    return True
 
   def test_all_buffers(self, buffers: list):
     for buffer_type in buffers:

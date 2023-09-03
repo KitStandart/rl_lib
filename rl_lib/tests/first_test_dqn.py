@@ -21,6 +21,7 @@ def create_model():
     return tf.keras.Model(inputs=input_layer, outputs=dence_out)
 
 config = load_default_config(__file__)
+pprint(config)
 config['model_config']['model'] = create_model()
 config['model_config']['input_shape'] = env.observation_space.shape
 config['model_config']['action_space'] = env.action_space.n
@@ -64,7 +65,7 @@ def run(algo):
             if done:
                 break
 
-        algo.save()       
+        # algo.save()       
         rewards.append(episode_reward)
         #testing algoritm perfomans
         if episode%test_frequency == 0:
@@ -90,6 +91,7 @@ def run(algo):
                 count
                 )
                 )
+    algo.load()
 
 if __name__ == "__main__":
     try:
