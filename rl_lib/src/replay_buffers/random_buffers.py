@@ -83,7 +83,7 @@ class Random_Buffer:
         if np.any(idx) == None:
             idx = self._get_idx( batch_size)
         state = np.stack(self.data[idx, 0], axis=0).astype(np.float32)
-        action = self.data[idx, 1].astype(np.int32)
+        action = np.stack(self.data[idx, 1], axis=0).astype(np.float32)
         reward = self.data[idx, 2].astype(np.float32)
         done = self.data[idx, 3].astype(np.float32)
         next_state = np.stack(self.data[idx, 4], axis=0).astype(np.float32)
@@ -143,7 +143,7 @@ class Random_Recurrent_Buffer(Random_Buffer):
         mem_idx = vector_idx[:,:2]
 
         state = self.stack(self.data[vector_idx[:, :-1], 0], batch_size).astype(np.float32)
-        action = self.data[vector_idx[:, :-1], 1].astype(np.int32)
+        action = self.stack(self.data[vector_idx[:, :-1], 1], batch_size).astype(np.int32)
         reward = self.data[vector_idx[:, :-1], 2].astype(np.float32)
         done = self.data[vector_idx[:, :-1], 3].astype(np.float32)
         next_state = self.stack(self.data[vector_idx[:, :-1], 4], batch_size).astype(np.float32)

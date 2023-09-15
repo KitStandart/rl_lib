@@ -9,7 +9,7 @@ class DQN_Model(Model):
     super().__init__(model_config = config.get('model_config', {}), config = config,  default_config_path=__file__, **kwargs)
   
   def _prediction_processing(self, inputs: tf.Tensor, **kwargs):
-    mask = self.make_mask(kwargs['action'])
+    mask = self.make_mask(tf.cast(kwargs['action'], dtype = tf.int32))
     if len(inputs.shape) != len(mask.shape): mask = tf.expand_dims(mask, -1)
     return tf.reduce_sum(tf.multiply(inputs, mask), axis=kwargs['batch_dims'])
   

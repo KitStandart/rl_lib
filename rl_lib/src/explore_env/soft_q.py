@@ -7,6 +7,7 @@ from tensorflow.random import categorical
 
 from .base_explore import Base_Explore
 from ..data_saver.utils import save_data, load_data
+from rl_lib.src.algoritms.base_algo import Base_Algo
 
 class Soft_Q(Base_Explore):
   """Больцмановская стратегия исследования 
@@ -26,7 +27,7 @@ class Soft_Q(Base_Explore):
     """Возвращает действие в соответствии с стратегией исследования"""
     probability = softmax(expand_dims(Q, 0)/self.tau, axis=self.axis)
     self.tau = self.tau * self.decay
-    return categorical(log(probability), 1, dtype=int32)
+    return Base_Algo.squeeze_predict(categorical(log(probability), 1, dtype=int32))
 
   @property
   def name(self):

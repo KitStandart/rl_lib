@@ -65,7 +65,7 @@ class SimpleQ(Base_Algo, ):
                  experimental_autograph_options = tf.autograph.experimental.Feature.ALL)
   def calculate_target(self, **kwargs):
     Qtarget = self.calculate_new_best_action(**kwargs)
-    dones = tf.ones((self.batch_size,), dtype=tf.dtypes.float32) if not self.recurrent else tf.ones((self.batch_size, kwargs.get('trace_length', 10)), dtype=tf.dtypes.float32)
+    dones = tf.ones(kwargs['done'].shape, dtype=tf.dtypes.float32) 
     dones = dones - kwargs['done']
     Qtarget = kwargs['reward'] + (self.discount_factor**self.n_step) * Qtarget * dones
     if self.recurrent:
@@ -88,11 +88,15 @@ class SimpleQ(Base_Algo, ):
   
   def get_action(self, observation: tf.Tensor) -> float:
     """Возвращает действие на основе наблюдения с учетом исследования"""
-    return int(self.exploration(self._get_action(observation)))
+    action = self.exploration(self._get_action(observation))
+    if isinstance(action, int) or action.shape == 1: return int(action)
+    else: return action.numpy()
 
   def get_test_action(self, observation: tf.Tensor) -> float:
     """Возвращает действие на основе наблюдения без исследования"""
-    return int(self.exploration.test(self._get_action(observation)))
+    action = self.exploration.test(self._get_action(observation))
+    if isinstance(action, int) or action.shape == 1: return int(action)
+    else: return action.numpy()
   
   def get_batch(self):
     """Получает батч из буфера"""

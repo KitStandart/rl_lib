@@ -1,0 +1,45 @@
+#default DQN config
+
+model_config:
+  model: None
+  name: "_CarRacing"
+  input_shape: None
+  action_space: None
+  discount_factor : 0.99
+  n_step: 1
+  batch_size: 32
+  double_network: False
+  priority: False
+  tau: 0.01
+  
+optimizer_config:
+  optimizer_name: "adam"
+  optimizer_params:
+    learning_rate: 0.001
+    epsilon: 0.001
+    clipnorm: 1.0
+  custom_optimizer: None
+
+buffer_config:
+  size: 100000
+  priority: False
+  n_step: None
+  discount_factor : None
+  eps: None
+  alpha: None
+  beta: None
+  beta_changing: None
+  beta_changing_curve: None
+  max_priority: None
+
+exploration_config:
+  strategy_name: "ou_noise"
+  strategy_config:
+    alpha: 0.9
+    sigma: 1.0
+    action_space: None
+
+data_saver:
+  path: "..\\examples\\ddpg\\car_racing/"
+  copy_path: ""
+    

@@ -5,6 +5,7 @@ import os.path as os_path
 from tensorflow.keras import layers
 import tensorflow as tf
 from pprint import pprint
+import traceback    
 
 from rl_lib.src.algoritms.drqn.drqn import DRQN
 from rl_lib.src.data_saver.utils import load_default_config
@@ -103,7 +104,7 @@ if __name__ == "__main__":
     try:
         run(algo=algo)
     
-    except Exception as e:
-        print(e)
+    except Exception:
+        print(traceback.format_exc())
         input("Press enter to exit: ")
 

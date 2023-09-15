@@ -5,39 +5,62 @@ import os.path as os_path
 from tensorflow.keras import layers
 import tensorflow as tf
 from pprint import pprint
-import traceback    
+import traceback
 
-from rl_lib.src.algoritms.dqn.dqn import DQN
+from rl_lib.src.algoritms.ddpg.ddpg import DDPG
 from rl_lib.src.data_saver.utils import load_default_config
 
-env = gym.make('CartPole-v0')
+env = gym.make('CarRacing-v2', domain_randomize=True)
+
+def create_conv():
+    input_layer = layers.Input(shape=env.observation_space.shape, )
+    cov_layer1 = layers.Conv2D(16, 7, activation='relu')(input_layer)
+    cov_layer2 = layers.Conv2D(32, 5, activation='relu')(cov_layer1)
+    conv_out = layers.Flatten()(cov_layer2)
+    return tf.keras.Model(inputs=input_layer, outputs=conv_out)  
 
 def create_model():
     """Создает модель tf.keras.Model, архитектура DQN"""
     input_layer = layers.Input(shape=env.observation_space.shape, )
-    dence_layer1 = layers.Dense(32, activation='relu')(input_layer)
+    conv_out = create_conv()(input_layer)
+    dence_layer1 = layers.Dense(32, activation='relu')(conv_out)
     dence_layer2 = layers.Dense(32, activation='relu')(dence_layer1)
-    dence_out = layers.Dense(env.action_space.n, activation=None)(dence_layer2)
+    dence_out = layers.Dense(env.action_space.shape[0], activation=None)(dence_layer2)
     
     return tf.keras.Model(inputs=input_layer, outputs=dence_out)
 
+def create_critic_model():
+    """Создает модель tf.keras.Model, архитектура DQN, начальные слои - сверточные"""
+    input_layer = layers.Input(shape=env.observation_space.shape, )
+    action_layer = layers.Input(shape=env.action_space.shape, )
+    
+    conv_out = create_conv()(input_layer)
+    concat = layers.Concatenate()((conv_out, action_layer))
+    flatten = layers.Flatten()(concat)
+    dence_layer1 = layers.Dense(32, activation='relu')(flatten)
+    dence_layer2 = layers.Dense(32, activation='relu')(dence_layer1)
+    dence_out = layers.Dense(env.action_space.shape[0], activation=None)(dence_layer2)
+    
+    return tf.keras.Model(inputs=[input_layer, action_layer], outputs=dence_out)  
+
 config = load_default_config(__file__)
-pprint(config)
-config['model_config']['model'] = create_model()
+
+config['model_config']['actor_model'] = create_model()
+config['model_config']['critic_model'] = create_critic_model()
 config['model_config']['input_shape'] = env.observation_space.shape
-config['model_config']['action_space'] = env.action_space.n
-algo = DQN(config)
+config['model_config']['action_space'] = env.action_space.shape[0]
+algo = DDPG(config)
 
 pprint(algo.config)
 
 def run(algo):
     epidodes = 250
-    steps = 200
-    train_frequency = 1
+    steps = 1000
+    train_frequency = 10
     test_frequency = 10
-    test_steps = 200
-    pre_train_steps = 2000
-    copy_weigths_frequency = 100
+    test_steps = 1000
+    pre_train_steps = 5000
+    copy_weigths_frequency = 1
 
     #history data
     rewards = []
@@ -51,7 +74,7 @@ def run(algo):
 
         observation, info = env.reset()
         episode_reward = 0
-        for step in range(1, steps):
+        for step in range(1, steps+1):
             action = algo.get_action(observation)
             new_observation, reward, done, _, info = env.step(action)
             algo.add((observation, action, reward, done, new_observation))
@@ -72,7 +95,7 @@ def run(algo):
         if episode%test_frequency == 0:
             observation, info = env.reset()
             episode_test_reward = 0
-            for test_step in range(1, test_steps):
+            for test_step in range(1, test_steps+1):
                 action = algo.get_test_action(observation)
                 observation, test_reward, done, _, info = env.step(action)
                 episode_test_reward += test_reward
@@ -98,7 +121,7 @@ if __name__ == "__main__":
     try:
         run(algo=algo)
     
-    except Exception as e:
+    except Exception:
         print(traceback.format_exc())
         input("Press enter to exit: ")
 

@@ -1,5 +1,6 @@
 import tensorflow as tf
 import abc
+from typing import Union
 
 from ..data_saver.utils import load_default_config
 from .utils import update_config
@@ -12,8 +13,8 @@ class Base_Algo(Saver, abc.ABC):
   def __init__(self, action_model: object, target_model: object, config: dict, default_config_path: str, *args, **kwargs):
     self._config = load_default_config(default_config_path)
     update_config(self._config, config)
-    self.action_model = action_model(self._config, algo_name = kwargs.get("algo_name", "unkown"), name = kwargs.get("name", "unkown_name") + "_action_" + config.get("model_config", {}).get("name", ""))
-    self.target_model = target_model(self._config, algo_name = kwargs.get("algo_name", "unkown"), name = kwargs.get("name", "unkown_name") + "_target_" + config.get("model_config", {}).get("name", ""))
+    self.action_model = action_model(config = self._config, algo_name = kwargs.get("algo_name", "unkown"), name = kwargs.get("name", "unkown_name") + "_action_" + config.get("model_config", {}).get("name", ""))
+    self.target_model = target_model(config = self._config, algo_name = kwargs.get("algo_name", "unkown"), name = kwargs.get("name", "unkown_name") + "_target_" + config.get("model_config", {}).get("name", ""))
     
     super().__init__(**self.config.get('data_saver', {}), **kwargs)
     self.target_model.set_weights(self.action_model.get_weights())
@@ -77,11 +78,11 @@ class Base_Algo(Saver, abc.ABC):
   @tf.function(reduce_retracing=True,
                 jit_compile=True,
                 experimental_autograph_options = tf.autograph.experimental.Feature.ALL)
-  def sample_action(self, state: tf.Tensor | tuple) -> tf.Tensor | list:
+  def sample_action(self, state: Union[tf.Tensor, tuple]) -> Union[tf.Tensor,  list]:
       """Возвращает предсказания модели на основе текущих наблюдений"""
       predict = self.action_model(state)
-      if isinstance(predict, list): 
-        return self.squeeze_predict(predict[0]), *predict[1:]
+      # if isinstance(predict, list): 
+      #   return self.squeeze_predict(predict[0]), *predict[1:]
       return self.squeeze_predict(predict)
 
   @tf.function(reduce_retracing=None, jit_compile=None, experimental_autograph_options=None)

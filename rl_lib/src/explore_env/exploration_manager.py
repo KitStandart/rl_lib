@@ -1,6 +1,7 @@
 from .epsilon_greedy import Epsilon_Greedy
 from .soft_q import Soft_Q
 from .base_explore import Base_Explore
+from .ou_noise import OU_Noise
 
 class ExplorationManager(Base_Explore):
   """Выбирает стратегию исследования и выполняет все ее функции
@@ -10,10 +11,19 @@ class ExplorationManager(Base_Explore):
   """
   def __init__(self, strategy_name="epsilon_greedy", strategy_config = {}, **kwargs):
     self._config = {"strategy_name": strategy_name, "strategy_config": strategy_config}
+
     if strategy_name.lower() == "epsilon_greedy":
       self.strategy = Epsilon_Greedy(**strategy_config)
-    if strategy_name.lower() == "soft_q":
+
+    elif strategy_name.lower() == "soft_q":
       self.strategy = Soft_Q(**strategy_config)
+
+    elif strategy_name.lower() == "ou_noise":
+      self.strategy = OU_Noise(**strategy_config)  
+
+    else:
+      assert 0, "Неизвестная стратегия"
+      
     self.strategy_name = self.strategy.name
     
   def __call__(self, Q):
