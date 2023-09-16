@@ -10,7 +10,7 @@ import traceback
 from rl_lib.src.algoritms.ddpg.ddpg import DDPG
 from rl_lib.src.data_saver.utils import load_default_config
 
-env = gym.make('CarRacing-v2', domain_randomize=True)
+env = gym.make('Pendulum-v1')
 
 def create_conv():
     input_layer = layers.Input(shape=env.observation_space.shape, )
@@ -22,9 +22,9 @@ def create_conv():
 def create_model():
     """Создает модель tf.keras.Model, архитектура DQN"""
     input_layer = layers.Input(shape=env.observation_space.shape, )
-    conv_out = create_conv()(input_layer)
-    dence_layer1 = layers.Dense(32, activation='relu')(conv_out)
-    dence_layer2 = layers.Dense(32, activation='relu')(dence_layer1)
+    # conv_out = create_conv()(input_layer)
+    dence_layer1 = layers.Dense(256, activation='relu')(input_layer)
+    dence_layer2 = layers.Dense(256, activation='relu')(dence_layer1)
     dence_out = layers.Dense(env.action_space.shape[0], activation=None)(dence_layer2)
     
     return tf.keras.Model(inputs=input_layer, outputs=dence_out)
@@ -32,13 +32,14 @@ def create_model():
 def create_critic_model():
     """Создает модель tf.keras.Model, архитектура DQN, начальные слои - сверточные"""
     input_layer = layers.Input(shape=env.observation_space.shape, )
-    action_layer = layers.Input(shape=env.action_space.shape, )
+    input_action_layer = layers.Input(shape=env.action_space.shape, )
+    action_layer = layers.Dense(32, activation='relu')(input_action_layer)
     
-    conv_out = create_conv()(input_layer)
-    concat = layers.Concatenate()((conv_out, action_layer))
+    # conv_out = create_conv()(input_layer)
+    concat = layers.Concatenate()((input_layer, action_layer))
     flatten = layers.Flatten()(concat)
-    dence_layer1 = layers.Dense(32, activation='relu')(flatten)
-    dence_layer2 = layers.Dense(32, activation='relu')(dence_layer1)
+    dence_layer1 = layers.Dense(256, activation='relu')(flatten)
+    dence_layer2 = layers.Dense(256, activation='relu')(dence_layer1)
     dence_out = layers.Dense(env.action_space.shape[0], activation=None)(dence_layer2)
     
     return tf.keras.Model(inputs=[input_layer, action_layer], outputs=dence_out)  
@@ -55,11 +56,11 @@ pprint(algo.config)
 
 def run(algo):
     epidodes = 250
-    steps = 1000
-    train_frequency = 10
+    steps = 100
+    train_frequency = 1
     test_frequency = 10
-    test_steps = 1000
-    pre_train_steps = 5000
+    test_steps = 100
+    pre_train_steps =    5000
     copy_weigths_frequency = 1
 
     #history data

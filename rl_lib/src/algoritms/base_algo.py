@@ -95,7 +95,7 @@ class Base_Algo(Saver, abc.ABC):
   @staticmethod
   def squeeze_predict(predict) -> tf.Tensor:
     """Удаляет единичные измерения из предсказаний"""
-    while predict.shape[0] == 1:
-          predict = tf.squeeze(predict)
+    while predict.shape[0] == 1 and len(predict.shape)>1:
+          predict = tf.squeeze(predict, axis=0)
     return predict
     

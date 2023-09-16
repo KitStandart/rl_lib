@@ -89,13 +89,13 @@ class SimpleQ(Base_Algo, ):
   def get_action(self, observation: tf.Tensor) -> float:
     """Возвращает действие на основе наблюдения с учетом исследования"""
     action = self.exploration(self._get_action(observation))
-    if isinstance(action, int) or action.shape == 1: return int(action)
+    if isinstance(action, int): return int(action)
     else: return action.numpy()
 
   def get_test_action(self, observation: tf.Tensor) -> float:
     """Возвращает действие на основе наблюдения без исследования"""
     action = self.exploration.test(self._get_action(observation))
-    if isinstance(action, int) or action.shape == 1: return int(action)
+    if isinstance(action, int): return int(action)
     else: return action.numpy()
   
   def get_batch(self):
