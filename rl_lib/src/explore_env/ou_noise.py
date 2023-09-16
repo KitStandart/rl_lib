@@ -16,7 +16,7 @@ class OU_Noise(Base_Explore):
         self.action_space = action_space 
         self.alpha = alpha
         self.axis = axis
-        self.eps = np.random.normal(size=self.action_space, scale = self.sigma)
+        self.eps = np.random.normal(size=self.action_space, scale = sigma)
         self.sigma = sigma        
         self._name = "ou_noise"                
         
