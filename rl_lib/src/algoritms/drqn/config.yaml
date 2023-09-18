@@ -2,7 +2,7 @@
 
 model_config:
   model: None
-  name: ""
+  name: "dedault_DRQN"
   input_shape: None
   action_space: None
   lstm_size: 64

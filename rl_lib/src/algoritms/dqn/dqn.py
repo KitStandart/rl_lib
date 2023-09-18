@@ -6,7 +6,7 @@ from rl_lib.src.algoritms.simple_q import SimpleQ
 
 class DQN_Model(Model):
   def __init__(self, config = {},**kwargs):
-    super().__init__(model_config = config.get('model_config', {}), config = config,  default_config_path=__file__, **kwargs)
+    super().__init__(model_config = config.get('model_config', {}), config = config, **kwargs)
   
   def _prediction_processing(self, inputs: tf.Tensor, **kwargs):
     mask = self.make_mask(tf.cast(kwargs['action'], dtype = tf.int32))

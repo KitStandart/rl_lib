@@ -6,21 +6,22 @@ from rl_lib.src.algoritms.dqn.dqn import DQN_Model
 
 class Actor_Model(DQN_Model):
   def __init__(self, config = {},**kwargs):
-    config['model_config']['model'] = config['model_config']['actor_model']
+    config['model_config'] = config['actor_model_config']['model_config']
+    config['optimizer_config'] = config['actor_optimizer_config']['optimizer_config']
     super().__init__(config = config, **kwargs)
     self.name = kwargs.get('name', 'error_name') + '_actor_'
   
   def _prediction_processing(self, inputs: tf.Tensor, **kwargs):
-    return inputs
+    return kwargs['critic_model']([kwargs['state'], inputs])
   
   def loss(self, target: tf.Tensor, predict: tf.Tensor) -> tf.Tensor:
     """Вычисляет и возвращает потери в соответствии с функцией потерь"""
     return tf.reduce_mean(predict, axis = 0) * (-1)
     
-    
 class Critic_Model(DQN_Model):
   def __init__(self, config = {},**kwargs):
-    config['model_config']['model'] = config['model_config']['critic_model']
+    config['model_config'] = config['critic_model_config']['model_config']
+    config['optimizer_config'] = config['critic_optimizer_config']['optimizer_config']
     super().__init__(config = config, **kwargs)
     self.name = kwargs.get('name', 'error_name') + '_critic_'
   
@@ -83,29 +84,32 @@ class Critic_Model(DQN_Model):
   
 class Actor_Critic_Model(DQN_Model):
   def __init__(self, config = {},**kwargs):
+    config['actor_model_config']['model_config']['name'] = config['model_config']['name']
+    config['actor_model_config']['model_config']['input_shape'] = config['model_config']['input_shape']
+    config['actor_model_config']['model_config']['action_space'] = config['model_config']['action_space']
+
+    config['critic_model_config']['model_config']['name'] = config['model_config']['name']
+    config['critic_model_config']['model_config']['input_shape'] = config['model_config']['input_shape']
+    config['critic_model_config']['model_config']['action_space'] = config['model_config']['action_space']
     self.actor_model = Actor_Model(config=config, **kwargs)
     self.critic_model = Critic_Model(config=config, **kwargs)
 
   def __call__(self, input: tf.Tensor) -> tf.Tensor:
     return self.critic_model([input, self.actor_model(input)])
 
-  @abc.abstractclassmethod
-  def update_weights(self, **kwargs) -> dict:
-      """
-      Выполняет обновление весов по алгоритму DDPG отимизатора
-
-      Kwargs:
-          dict содержащий батч, таргет, маску, опционально приоритетные веса
-
-      Returns: 
-          dict содержащий лоссы и td-ошибку
-      """
-
-      kwargs['action'] = self.actor_model(kwargs['next_state']) 
-      _ = self.actor_model.update_weights(**kwargs)
-      loss = self.critic_model.update_weights(**kwargs)
-      return {'loss': loss['loss'], 'td_error': loss['td_error']}
+  def update_weights(self, **kwargs):
+    _ = self.update_weights_actor(**kwargs)
+    return self.update_weights_critic(**kwargs)
   
+  def update_weights_actor(self, **kwargs):
+    kwargs['critic_model'] = self.critic_model
+    loss = self.actor_model.update_weights(**kwargs)
+    return {'loss': loss['loss'], 'td_error': loss['td_error']}
+
+  def update_weights_critic(self, **kwargs) -> dict:
+      loss = self.critic_model.update_weights(**kwargs)
+      return {'loss': loss['loss'], 'td_error': loss['td_error']}    
+
   def calculate_gradients(self, **kwargs) -> dict:
     kwargs['action'] = self.actor_model(kwargs['next_state']) 
     gradients = self.critic_model.calculate_gradients(**kwargs)

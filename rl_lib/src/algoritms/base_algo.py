@@ -1,6 +1,7 @@
 import tensorflow as tf
 import abc
 from typing import Union
+from copy import copy
 
 from ..data_saver.utils import load_default_config
 from .utils import update_config
@@ -13,11 +14,12 @@ class Base_Algo(Saver, abc.ABC):
   def __init__(self, action_model: object, target_model: object, config: dict, default_config_path: str, *args, **kwargs):
     self._config = load_default_config(default_config_path)
     update_config(self._config, config)
-    self.action_model = action_model(config = self._config, algo_name = kwargs.get("algo_name", "unkown"), name = kwargs.get("name", "unkown_name") + "_action_" + config.get("model_config", {}).get("name", ""))
-    self.target_model = target_model(config = self._config, algo_name = kwargs.get("algo_name", "unkown"), name = kwargs.get("name", "unkown_name") + "_target_" + config.get("model_config", {}).get("name", ""))
     
+    self.action_model = action_model(config = copy(self._config), algo_name = kwargs.get("algo_name", "unkown"), name = kwargs.get("name", "unkown_name") + "_action_" + config.get("model_config", {}).get("name", ""))
+    self.target_model = target_model(config = copy(self._config), algo_name = kwargs.get("algo_name", "unkown"), name = kwargs.get("name", "unkown_name") + "_target_" + config.get("model_config", {}).get("name", ""))
     super().__init__(**self.config.get('data_saver', {}), **kwargs)
     self.target_model.set_weights(self.action_model.get_weights())
+    
 
   @property
   def config(self):
@@ -68,13 +70,18 @@ class Base_Algo(Saver, abc.ABC):
     """Выводит архитектуру модели"""
     
   @tf.function(reduce_retracing=None, jit_compile=None, experimental_autograph_options=None)
-  def copy_weights(self,) -> tf.constant:
+  def _copy_weights(self, action_model_weights: list, target_model_weights: list, tau: float) -> tf.constant:
       """Копирует веса из модели действия в целевую модель"""
-      for a_w, t_w in zip(self.action_model.weights, self.target_model.weights):
-          new_weights = tf.add(tf.multiply(self.tau, a_w), tf.multiply((1-self.tau), t_w))
+      for a_w, t_w in zip(action_model_weights, target_model_weights):
+          new_weights = tf.add(tf.multiply(tau, a_w), tf.multiply((1-tau), t_w))
           t_w.assign(tf.identity(new_weights))
       return tf.constant(1)
-    
+
+  def copy_weights(self) -> tf.constant:
+     """Копирует веса из модели действия в целевую модель"""
+     res = self._copy_weights(self.action_model.weights, self.target_model.weights, self.tau)
+     return res 
+
   @tf.function(reduce_retracing=True,
                 jit_compile=True,
                 experimental_autograph_options = tf.autograph.experimental.Feature.ALL)

@@ -11,25 +11,11 @@ from rl_lib.src.algoritms.a2c.actor_critic import Actor_Critic_Model
 class DDPG_Model(Actor_Critic_Model):
   def __init__(self, config = {},**kwargs):
     super().__init__(config=config, **kwargs)
-
-  def update_weights(self, **kwargs) -> dict:
-      """
-      Выполняет обновление весов по алгоритму DDPG отимизатора
-
-      Kwargs:
-          dict содержащий батч, таргет, маску, опционально приоритетные веса
-
-      Returns: 
-          dict содержащий лоссы и td-ошибку
-      """
-
-      kwargs['action'] = self.actor_model(kwargs['next_state']) 
-      _ = self.actor_model.update_weights(**kwargs)
-      loss = self.critic_model.update_weights(**kwargs)
-      return {'loss': loss['loss'], 'td_error': loss['td_error']}
   
 class DDPG(SimpleQ):
   def __init__(self, config):
+    self.actor_tau = config['actor_model_config']['model_config']['tau']
+    self.critic_tau = config['critic_model_config']['model_config']['tau'] 
     super().__init__(DDPG_Model, DDPG_Model, config,  default_config_path=__file__, algo_name = "DDPG_Model", name = "DDPG_Model_" + config.get('model_config','').get('name',''))
 
   def _prediction_processing(self, input_data):
@@ -50,18 +36,21 @@ class DDPG(SimpleQ):
   def get_best_action(self, Qaction, Qtarget):
     return Qtarget 
 
-  @tf.function(reduce_retracing=None, jit_compile=None, experimental_autograph_options=None)
-  def _copy_weights(self, action_model_weights: list, target_model_weights: list) -> tf.constant:
-      """Копирует веса из модели действия в целевую модель"""
-      for a_w, t_w in zip(action_model_weights, target_model_weights):
-          new_weights = tf.add(tf.multiply(self.tau, a_w), tf.multiply((1-self.tau), t_w))
-          t_w.assign(tf.identity(new_weights))
-      return tf.constant(1)
+  def _train_step(self, **batch) -> dict:
+    """Вспомогательная train_step"""
+    batch = self.choice_model_for_double_calculates(**batch)
+    batch['batch_dims'] = self.batch_dims
+    if batch['p_double'] > 0.5: 
+      self.action_model.update_weights_actor(**batch)  
+      return self.action_model.update_weights_critic(**batch)  
+    else: 
+      self.target_model.update_weights_actor(**batch)  
+      return self.target_model.update_weights_critic(**batch) 
   
   def copy_weights(self) -> tf.constant:
      """Копирует веса из модели действия в целевую модель"""
-     _ = self._copy_weights(self.action_model.actor_model.weights, self.target_model.actor_model.weights)
-     _ = self._copy_weights(self.action_model.critic_model.weights, self.target_model.critic_model.weights)
+     _ = self._copy_weights(self.action_model.actor_model.weights, self.target_model.actor_model.weights, self.actor_tau)
+     _ = self._copy_weights(self.action_model.critic_model.weights, self.target_model.critic_model.weights, self.critic_tau)
      return tf.constant(1)
   
   @tf.function(reduce_retracing=True,

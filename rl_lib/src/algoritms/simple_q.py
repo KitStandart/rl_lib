@@ -11,6 +11,7 @@ class SimpleQ(Base_Algo, ):
   def __init__(self, action_model: object, target_model: object, config: dict, **kwargs):
     
     Base_Algo.__init__(self, action_model, target_model, config, **kwargs)
+    # print(self.config)
     config = link_data_inside_the_config(self.config)
     self.buffer = ReplayBuffer(**config.get("buffer_config", {}))
     self.exploration = ExplorationManager(**config.get("exploration_config", {}))
@@ -167,6 +168,7 @@ class SimpleQ(Base_Algo, ):
 
 
 def link_data_inside_the_config(config):
+  # print(config)
   discount_factor = config['model_config']['discount_factor']
   n_step = config['model_config']['n_step']
   action_space = config['model_config']['action_space']
