@@ -22,8 +22,8 @@ def create_conv():
 def create_model():
     """Создает модель tf.keras.Model, архитектура DQN"""
     input_layer = layers.Input(shape=env.observation_space.shape, )
-    # conv_out = create_conv()(input_layer)
-    dence_layer1 = layers.Dense(256, activation='relu')(input_layer)
+    conv_out = create_conv()(input_layer)
+    dence_layer1 = layers.Dense(256, activation='relu')(conv_out)
     dence_layer2 = layers.Dense(256, activation='relu')(dence_layer1)
     dence_out = layers.Dense(env.action_space.shape[0], activation='tanh')(dence_layer2)
 
@@ -34,13 +34,11 @@ def create_model():
 def create_critic_model():
     """Создает модель tf.keras.Model, архитектура DQN, начальные слои - сверточные"""
     input_layer = layers.Input(shape=env.observation_space.shape, )
-    obsv_layer = layers.Dense(16, activation='relu')(input_layer)
-    obsv_layer = layers.Dense(32, activation='relu')(obsv_layer)
     input_action_layer = layers.Input(shape=env.action_space.shape, )
     action_layer = layers.Dense(32, activation='relu')(input_action_layer)
     
-    # conv_out = create_conv()(input_layer)
-    concat = layers.Concatenate()((obsv_layer, action_layer))
+    conv_out = create_conv()(input_layer)
+    concat = layers.Concatenate()((conv_out, action_layer))
     flatten = layers.Flatten()(concat)
     dence_layer1 = layers.Dense(256, activation='relu')(flatten)
     dence_layer2 = layers.Dense(256, activation='relu')(dence_layer1)
