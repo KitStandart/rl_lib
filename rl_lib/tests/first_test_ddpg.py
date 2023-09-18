@@ -23,8 +23,8 @@ def create_model():
     """Создает модель tf.keras.Model, архитектура DQN"""
     input_layer = layers.Input(shape=env.observation_space.shape, )
     conv_out = create_conv()(input_layer)
-    dence_layer1 = layers.Dense(256, activation='relu')(conv_out)
-    dence_layer2 = layers.Dense(256, activation='relu')(dence_layer1)
+    dence_layer1 = layers.Dense(64, activation='relu')(conv_out)
+    dence_layer2 = layers.Dense(64, activation='relu')(dence_layer1)
     dence_out = layers.Dense(env.action_space.shape[0], activation='tanh')(dence_layer2)
 
     dence_out = dence_out*2
@@ -42,8 +42,8 @@ def create_critic_model():
     conv_out = create_conv()(input_layer)
     concat = layers.Concatenate()((conv_out, action_layer))
     flatten = layers.Flatten()(concat)
-    dence_layer1 = layers.Dense(256, activation='relu')(flatten)
-    dence_layer2 = layers.Dense(256, activation='relu')(dence_layer1)
+    dence_layer1 = layers.Dense(64, activation='relu')(flatten)
+    dence_layer2 = layers.Dense(64, activation='relu')(dence_layer1)
     dence_out = layers.Dense(env.action_space.shape[0], activation=None)(dence_layer2)
     
     return tf.keras.Model(inputs=[input_layer, input_action_layer], outputs=dence_out)   
