@@ -88,8 +88,8 @@ class Base_Algo(Saver, abc.ABC):
   def sample_action(self, state: Union[tf.Tensor, tuple]) -> Union[tf.Tensor,  list]:
       """Возвращает предсказания модели на основе текущих наблюдений"""
       predict = self.action_model(state)
-      # if isinstance(predict, list): 
-      #   return self.squeeze_predict(predict[0]), *predict[1:]
+      if isinstance(predict, list): 
+        return self.squeeze_predict(predict[0]), predict[1], predict[2]
       return self.squeeze_predict(predict)
 
   @tf.function(reduce_retracing=None, jit_compile=None, experimental_autograph_options=None)
@@ -102,7 +102,7 @@ class Base_Algo(Saver, abc.ABC):
   @staticmethod
   def squeeze_predict(predict) -> tf.Tensor:
     """Удаляет единичные измерения из предсказаний"""
-    while predict.shape[0] == 1 and len(predict.shape)>1:
+    while len(predict.shape)>=1 and predict.shape[0] == 1:
           predict = tf.squeeze(predict, axis=0)
     return predict
     
