@@ -4,9 +4,9 @@ model_config:
   name: "_test_Pendulum"
   input_shape: None
   action_space: None
-  discount_factor : 0.99
+  discount_factor : 0.9
   n_step: 1
-  batch_size: 32
+  batch_size: 64
   double_network: False
   priority: False
 
@@ -40,22 +40,19 @@ critic_optimizer_config:
     custom_optimizer: None
 
 buffer_config:
-  size: 100000
-  priority: False
-  n_step: None
-  discount_factor : None
-  eps: None
-  alpha: None
-  beta: None
-  beta_changing: None
-  beta_changing_curve: None
-  max_priority: None
+  size: 50000
+  eps: 0.01
+  alpha: 0.5
+  beta: 0.4
+  beta_changing: 0.0005
+  beta_changing_curve: 'linear'
+  max_priority: 0.1
 
 exploration_config:
   strategy_name: "ou_noise"
   strategy_config:
-    alpha: 0.5
-    sigma: 1.0
+    alpha: 0.3
+    sigma: 0.2
     action_space: None
 
 data_saver:

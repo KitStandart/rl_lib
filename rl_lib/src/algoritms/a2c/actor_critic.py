@@ -49,6 +49,7 @@ class Critic_Model(DQN_Model):
           td_error = kwargs['Qtarget'] - Q
           loss = self.loss(kwargs['Qtarget'], Q)*kwargs.get('weights', 1.0)
       gradients = tape.gradient(loss, self.model.trainable_variables)
+      loss = tf.reduce_mean(loss, axis=-1)
       return {'gradients': gradients, 'loss': loss, 'td_error': td_error}
     
   @staticmethod

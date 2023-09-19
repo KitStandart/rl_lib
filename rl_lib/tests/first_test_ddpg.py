@@ -10,7 +10,7 @@ import traceback
 from rl_lib.src.algoritms.ddpg.ddpg import DDPG
 from rl_lib.src.data_saver.utils import load_default_config
 
-env = gym.make('CarRacing-v2')
+env = gym.make('BipedalWalker-v3')
 
 def create_conv():
     input_layer = layers.Input(shape=env.observation_space.shape, )
@@ -22,25 +22,25 @@ def create_conv():
 def create_model():
     """Создает модель tf.keras.Model, архитектура DQN"""
     input_layer = layers.Input(shape=env.observation_space.shape, )
-    conv_out = create_conv()(input_layer)
-    dence_layer1 = layers.Dense(64, activation='relu')(conv_out)
+    # conv_out = create_conv()(input_layer)
+    dence_layer1 = layers.Dense(64, activation='relu')(input_layer)
     dence_layer2 = layers.Dense(64, activation='relu')(dence_layer1)
     dence_out = layers.Dense(env.action_space.shape[0], activation='tanh')(dence_layer2)
 
-    dence_out = dence_out*2
+    dence_out = dence_out*tf.reduce_max((tf.abs(env.action_space.low), env.action_space.high))
     
     return tf.keras.Model(inputs=input_layer, outputs=dence_out)
 
 def create_critic_model():
     """Создает модель tf.keras.Model, архитектура DQN, начальные слои - сверточные"""
     input_layer = layers.Input(shape=env.observation_space.shape, )
-    # obsv_layer = layers.Dense(16, activation='relu')(input_layer)
-    # obsv_layer = layers.Dense(32, activation='relu')(obsv_layer)
+    obsv_layer = layers.Dense(16, activation='relu')(input_layer)
+    obsv_layer = layers.Dense(32, activation='relu')(obsv_layer)
     input_action_layer = layers.Input(shape=env.action_space.shape, )
     action_layer = layers.Dense(32, activation='relu')(input_action_layer)
     
-    conv_out = create_conv()(input_layer)
-    concat = layers.Concatenate()((conv_out, action_layer))
+    # conv_out = create_conv()(input_layer)
+    concat = layers.Concatenate()((input_layer, action_layer))
     flatten = layers.Flatten()(concat)
     dence_layer1 = layers.Dense(64, activation='relu')(flatten)
     dence_layer2 = layers.Dense(64, activation='relu')(dence_layer1)
@@ -58,17 +58,16 @@ config['model_config']['action_space'] = env.action_space.shape[0]
 config['exploration_config']['strategy_config']['upper_bound'] = env.action_space.high
 config['exploration_config']['strategy_config']['lower_bound'] = env.action_space.low
 
-pprint(config)
 algo = DDPG(config)
 
 pprint(algo.config)
 
 def run(algo):
     epidodes = 250
-    steps = 100
+    steps = 500
     train_frequency = 1
     test_frequency = 10
-    test_steps = 100
+    test_steps = 500
     pre_train_steps = 1000
     copy_weigths_frequency = 1
 
@@ -99,7 +98,7 @@ def run(algo):
             if done:
                 break
 
-        # algo.save()       
+        algo.save()       
         rewards.append(episode_reward)
         #testing algoritm perfomans
         if episode%test_frequency == 0:
