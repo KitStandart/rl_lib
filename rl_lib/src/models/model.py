@@ -1,4 +1,5 @@
 import tensorflow as tf
+import numpy as np
 import abc
 from tensorflow.keras.models import clone_model
 
@@ -20,6 +21,8 @@ class Model(ModelNN, ModelIO, BaseModel, abc.ABC):
       return self.create_model_with_conv(input_shape, action_space)
   
   def check_input_shape(self, inputs):
+    if not isinstance(inputs, (tf.Tensor, np.ndarray)):
+      return inputs
     while len(inputs.shape) < len(self.input_spec()):
       inputs = tf.expand_dims(inputs,0)
     if len(inputs.shape) > len(self.input_spec()): assert 0 #inputs.shape не может быть больше входа модели
