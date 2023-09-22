@@ -22,7 +22,14 @@ class Model(ModelNN, ModelIO, BaseModel, abc.ABC):
   
   def check_input_shape(self, inputs):
     if not isinstance(inputs, (tf.Tensor, np.ndarray)):
-      return inputs
+      if isinstance(inputs, dict):
+        for key, inpt in inputs.items():
+          inputs[key] = self.check_input_shape(inpt)
+        return inputs
+      elif isinstance(inputs, list):
+        for key, inpt in enumerate(inputs):
+          inputs[key] = self.check_input_shape(inpt)
+        return inputs  
     while len(inputs.shape) < len(self.input_spec()):
       inputs = tf.expand_dims(inputs,0)
     if len(inputs.shape) > len(self.input_spec()): assert 0 #inputs.shape не может быть больше входа модели
