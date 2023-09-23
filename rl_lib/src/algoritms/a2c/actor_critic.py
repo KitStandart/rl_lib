@@ -122,8 +122,8 @@ class Actor_Critic_Model(DQN_Model):
         'critic': self.critic_model.get_weights()
      }
 
-  def input_spec(self):
-    return self.actor_model.input_spec()
+  def input_spec(self, key=None):
+    return self.actor_model.input_spec(key=key)
   
   def load(self, path):
     self.actor_model.load(path)

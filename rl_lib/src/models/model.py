@@ -20,19 +20,14 @@ class Model(ModelNN, ModelIO, BaseModel, abc.ABC):
     else:
       return self.create_model_with_conv(input_shape, action_space)
   
-  def check_input_shape(self, inputs):
+  def check_input_shape(self, inputs, key=None):
     if not isinstance(inputs, (tf.Tensor, np.ndarray)):
-      if isinstance(inputs, dict):
-        for key, inpt in inputs.items():
-          inputs[key] = self.check_input_shape(inpt)
-        return inputs
-      elif isinstance(inputs, list):
-        for key, inpt in enumerate(inputs):
-          inputs[key] = self.check_input_shape(inpt)
-        return inputs  
-    while len(inputs.shape) < len(self.input_spec()):
+      for key, inpt in inputs.items() if isinstance(inputs, dict) else enumerate(inputs):
+        inputs[key] = self.check_input_shape(inpt, key=key)
+      return inputs
+    while len(inputs.shape) < len(self.input_spec(key=key)):
       inputs = tf.expand_dims(inputs,0)
-    if len(inputs.shape) > len(self.input_spec()): assert 0 #inputs.shape не может быть больше входа модели
+    if len(inputs.shape) > len(self.input_spec(key=key)): assert 0 #inputs.shape не может быть больше входа модели
     return inputs
   
   def initial_model(self):
@@ -43,8 +38,9 @@ class Model(ModelNN, ModelIO, BaseModel, abc.ABC):
     optimizer = get_optimizer(**optimizer)
     self.set_new_model(model, optimizer)
 
-  def input_spec(self):
-    return self.model.layers[0].input_shape[0]
+  def input_spec(self, key=None):
+    if key!=None: return self.model.input[key].shape
+    return self.model.input.shape
 
   def load(self, path):
     self.model = tf.keras.models.load_model(path+self.name+'.h5')
