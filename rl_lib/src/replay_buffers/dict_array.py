@@ -26,7 +26,7 @@ class StructArray:
 
     @staticmethod
     def stack(array, axis=0):
-        return np.stack(array, axis=axis)
+        return np.stack(array, axis=axis).astype(np.float32)
 
 class NonStructArray:
     """Не структурированный массив"""
