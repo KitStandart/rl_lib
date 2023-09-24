@@ -38,7 +38,7 @@ class OU_Noise(Base_Explore):
     """
     def __init__(self, action_space = None, 
                  axis=-1, alpha = 0.9, dt = 0.01,
-                 lower_bound = -1.0, mean = 0.0,
+                 lower_bound = -1.0, mean = np.zeros(action_space),
                  sigma=1.0, theta = 0.15,
                  upper_bound = 1.0, 
                  **kwargs):        
