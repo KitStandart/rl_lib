@@ -38,7 +38,7 @@ class OU_Noise(Base_Explore):
     """
     def __init__(self, action_space = None, 
                  axis=-1, alpha = 0.9, dt = 0.01,
-                 lower_bound = -1.0, mean = np.zeros(action_space),
+                 lower_bound = -1.0, mean: np.ndarray = None,
                  sigma=1.0, theta = 0.15,
                  upper_bound = 1.0, 
                  **kwargs):        
@@ -46,7 +46,7 @@ class OU_Noise(Base_Explore):
         self.action_space = action_space 
         self.alpha = alpha
         self.axis = axis
-        self.ou_gen = OU_Noise_generator(mean, sigma , theta=theta, dt=dt, x_initial=None)
+        self.ou_gen = OU_Noise_generator(np.zeros(action_space) if mean==None else mean, sigma , theta=theta, dt=dt, x_initial=None)
         self.eps = self.ou_gen()
         self.lower_bound = lower_bound
         self.sigma = sigma        
