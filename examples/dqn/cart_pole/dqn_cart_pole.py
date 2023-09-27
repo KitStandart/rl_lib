@@ -49,6 +49,7 @@ def run(algo):
 
         observation, info = env.reset()
         episode_reward = 0
+        episode_loss = []
         for step in range(1, steps):
             action = algo.get_action(observation)
             new_observation, reward, done, _, info = env.step(action)

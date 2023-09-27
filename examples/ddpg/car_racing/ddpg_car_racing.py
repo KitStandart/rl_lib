@@ -42,7 +42,7 @@ def create_critic_model():
     flatten = layers.Flatten()(concat)
     dence_layer1 = layers.Dense(256, activation='relu')(flatten)
     dence_layer2 = layers.Dense(256, activation='relu')(dence_layer1)
-    dence_out = layers.Dense(env.action_space.shape[0], activation=None)(dence_layer2)
+    dence_out = layers.Dense(1, activation=None)(dence_layer2)
     
     return tf.keras.Model(inputs=[input_layer, input_action_layer], outputs=dence_out)   
 
@@ -81,6 +81,7 @@ def run(algo):
 
         observation, info = env.reset()
         episode_reward = 0
+        episode_loss = []
         for step in range(1, steps+1):
             action = algo.get_action(observation)
             new_observation, reward, done, _, info = env.step(action)

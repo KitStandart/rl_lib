@@ -15,7 +15,7 @@ class OU_Noise_generator:
 
     def __call__(self):
         # Formula taken from https://www.wikipedia.org/wiki/Ornstein-Uhlenbeck_process.
-        dx = (self.theta * (self.mean - self.x_prev) * self.dt+ self.sigma  * np.sqrt(self.dt) * np.random.normal(size=self.mean.shape))
+        dx = (self.theta * (self.mean - self.x_prev) * self.dt + self.sigma  * np.sqrt(self.dt) * np.random.normal(size=self.mean.shape, scale=self.sigma))
         # Store x into x_prev
         # Makes next noise dependent on current one
         self.x_prev += dx
@@ -42,11 +42,10 @@ class OU_Noise(Base_Explore):
                  sigma=1.0, theta = 0.15,
                  upper_bound = 1.0, 
                  **kwargs):        
-        
         self.action_space = action_space 
         self.alpha = alpha
         self.axis = axis
-        self.ou_gen = OU_Noise_generator(np.zeros(action_space) if mean==None else mean, sigma , theta=theta, dt=dt, x_initial=None)
+        self.ou_gen = OU_Noise_generator(np.zeros(action_space) if mean=="None" else mean, sigma , theta=theta, dt=dt, x_initial=None)
         self.eps = self.ou_gen()
         self.lower_bound = lower_bound
         self.sigma = sigma        

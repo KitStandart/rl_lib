@@ -145,7 +145,8 @@ class ModelNN(abc.ABC):
 
           td_error = kwargs['Qtarget'] - Q
           loss = self.loss(kwargs['Qtarget'], Q)*kwargs.get('weights', 1.0)
-      gradients = tape.gradient(loss, self.model.trainable_variables)
+          E_loss = tf.reduce_mean(loss, axis=0)
+      gradients = tape.gradient(E_loss, self.model.trainable_variables)
       return {'gradients': gradients, 'loss': loss, 'td_error': td_error}
 
   @tf.function(reduce_retracing=True,

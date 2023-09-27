@@ -1,27 +1,46 @@
-#CartPole DQN config
+#default DDPG config
 
 model_config:
-  model: None
-  name: "_test_cart_pole"
+  name: "_test_CarRacing"
   input_shape: None
   action_space: None
-  discount_factor : 0.9
+  discount_factor : 0.99
   n_step: 1
-  batch_size: 32
-  double_network: True
+  batch_size: 16
+  double_network: False
   priority: False
-  tau: 1.0
-  
-optimizer_config:
-  optimizer_name: "adam"
-  optimizer_params:
-    learning_rate: 0.01
-    epsilon: 0.001
-    clipnorm: 1.0
-  custom_optimizer: None
+
+
+actor_model_config:
+  model_config:
+    model: None
+    tau: 0.001
+
+critic_model_config:
+  model_config:
+    model: None
+    tau: 0.001
+
+actor_optimizer_config:
+  optimizer_config:
+    optimizer_name: "adam"
+    optimizer_params:
+      learning_rate: 0.0001
+      epsilon: 0.001
+      clipnorm: 1.0
+    custom_optimizer: None
+
+critic_optimizer_config:
+  optimizer_config:
+    optimizer_name: "adam"
+    optimizer_params:
+      learning_rate: 0.001
+      epsilon: 0.001
+      clipnorm: 1.0
+    custom_optimizer: None
 
 buffer_config:
-  size: 10000
+  size: 100000
   eps: 0.01
   alpha: 0.5
   beta: 0.4
@@ -30,13 +49,14 @@ buffer_config:
   max_priority: 0.1
 
 exploration_config:
-  strategy_name: "soft_q"
+  strategy_name: "ou_noise"
   strategy_config:
-    decay: 1.
-    tau: 0.1
-    eps_min: 0.01
-    eps_test: 0.001
+    alpha: 0.0
+    sigma: 0.2
     action_space: None
+    dt: 0.01
+    mean: None
+    theta: 0.15
 
 data_saver:
   path: "..\\rl_lib\\rl_lib\\tests\\models/"

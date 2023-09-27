@@ -67,7 +67,7 @@ class SimpleQ(Base_Algo, ):
                  experimental_autograph_options = tf.autograph.experimental.Feature.ALL)
   def calculate_target(self, **kwargs):
     Qtarget = self.calculate_new_best_action(**kwargs)
-    dones = tf.ones(kwargs['done'].shape, dtype=tf.dtypes.float32) 
+    dones = tf.ones_like(kwargs['done'], dtype=tf.dtypes.float32) 
     dones = dones - kwargs['done']
     Qtarget = kwargs['reward'] + (self.discount_factor**self.n_step) * Qtarget * dones
     if self.recurrent:

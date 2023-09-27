@@ -9,23 +9,28 @@ import traceback
 
 from rl_lib.src.algoritms.ddpg.ddpg import DDPG
 from rl_lib.src.data_saver.utils import load_default_config
+from rl_lib.src.normalizes import normalize_m1_1
 
-env = gym.make('BipedalWalker-v3')
+env = gym.make('CarRacing-v2')
+
+initializer = tf.keras.initializers.RandomUniform(minval=-3*1e-4, maxval=3*1e-4, seed=40)
 
 def create_conv():
     input_layer = layers.Input(shape=env.observation_space.shape, )
-    cov_layer1 = layers.Conv2D(16, 7, activation='relu')(input_layer)
-    cov_layer2 = layers.Conv2D(32, 5, activation='relu')(cov_layer1)
-    conv_out = layers.Flatten()(cov_layer2)
+    lambda_layer = layers.Lambda(normalize_m1_1)(input_layer)
+    cov_layer1 = layers.Conv2D(32, 7, 4, activation='relu', kernel_initializer=initializer)(lambda_layer)
+    cov_layer2 = layers.Conv2D(32, 5, 2,activation='relu', kernel_initializer=initializer)(cov_layer1)
+    cov_layer3 = layers.Conv2D(32, 3, 2,activation='relu', kernel_initializer=initializer)(cov_layer2)
+    conv_out = layers.Flatten()(cov_layer3)
     return tf.keras.Model(inputs=input_layer, outputs=conv_out)  
 
 def create_model():
     """Создает модель tf.keras.Model, архитектура DQN"""
     input_layer = layers.Input(shape=env.observation_space.shape, )
-    # conv_out = create_conv()(input_layer)
-    dence_layer1 = layers.Dense(64, activation='relu')(input_layer)
-    dence_layer2 = layers.Dense(64, activation='relu')(dence_layer1)
-    dence_out = layers.Dense(env.action_space.shape[0], activation='tanh')(dence_layer2)
+    conv_out = create_conv()(input_layer)
+    dence_layer1 = layers.Dense(256, activation='relu', kernel_initializer=initializer)(conv_out)
+    dence_layer2 = layers.Dense(256, activation='relu', kernel_initializer=initializer)(dence_layer1)
+    dence_out = layers.Dense(env.action_space.shape[0], activation='tanh', kernel_initializer=initializer)(dence_layer2)
 
     dence_out = dence_out*tf.reduce_max((tf.abs(env.action_space.low), env.action_space.high))
     
@@ -34,17 +39,17 @@ def create_model():
 def create_critic_model():
     """Создает модель tf.keras.Model, архитектура DQN, начальные слои - сверточные"""
     input_layer = layers.Input(shape=env.observation_space.shape, )
-    obsv_layer = layers.Dense(16, activation='relu')(input_layer)
-    obsv_layer = layers.Dense(32, activation='relu')(obsv_layer)
+    obsv_layer = layers.Dense(128, activation='relu', kernel_initializer=initializer)(input_layer)
+    obsv_layer = layers.Dense(64, activation='relu', kernel_initializer=initializer)(obsv_layer)
     input_action_layer = layers.Input(shape=env.action_space.shape, )
-    action_layer = layers.Dense(32, activation='relu')(input_action_layer)
+    action_layer = layers.Dense(32, activation='relu', kernel_initializer=initializer)(input_action_layer)
     
-    # conv_out = create_conv()(input_layer)
-    concat = layers.Concatenate()((input_layer, action_layer))
+    conv_out = create_conv()(input_layer)
+    concat = layers.Concatenate()((conv_out, action_layer))
     flatten = layers.Flatten()(concat)
-    dence_layer1 = layers.Dense(64, activation='relu')(flatten)
-    dence_layer2 = layers.Dense(64, activation='relu')(dence_layer1)
-    dence_out = layers.Dense(env.action_space.shape[0], activation=None)(dence_layer2)
+    dence_layer1 = layers.Dense(256, activation='relu', kernel_initializer=initializer)(flatten)
+    dence_layer2 = layers.Dense(256, activation='relu', kernel_initializer=initializer)(dence_layer1)
+    dence_out = layers.Dense(1, activation=None)(dence_layer2)
     
     return tf.keras.Model(inputs=[input_layer, input_action_layer], outputs=dence_out)   
 
@@ -60,15 +65,17 @@ config['exploration_config']['strategy_config']['lower_bound'] = env.action_spac
 
 algo = DDPG(config)
 
+# algo.load()
 pprint(algo.config)
 
 def run(algo):
     epidodes = 250
-    steps = 500
+    steps = 250
     train_frequency = 1
-    test_frequency = 10
-    test_steps = 500
-    pre_train_steps = 1000
+    test_frequency = 30
+    save_frequency = 10
+    test_steps = 250
+    pre_train_steps = 1
     copy_weigths_frequency = 1
 
     #history data
@@ -83,9 +90,10 @@ def run(algo):
 
         observation, info = env.reset()
         episode_reward = 0
+        episode_loss = []
         for step in range(1, steps+1):
             action = algo.get_action(observation)
-            new_observation, reward, done, _, info = env.step(action)
+            new_observation, reward, done, tr, info = env.step(action)
             algo.add((observation, action, reward, done, new_observation))
             episode_reward += reward
             count += 1
@@ -95,10 +103,10 @@ def run(algo):
                 if count % copy_weigths_frequency == 0:
                     res = algo.copy_weights()
             observation = new_observation
-            if done:
+            if done or tr:
                 break
 
-        algo.save()       
+        if episode % save_frequency == 0: algo.save()       
         rewards.append(episode_reward)
         #testing algoritm perfomans
         if episode%test_frequency == 0:
@@ -106,9 +114,9 @@ def run(algo):
             episode_test_reward = 0
             for test_step in range(1, test_steps+1):
                 action = algo.get_test_action(observation)
-                observation, test_reward, done, _, info = env.step(action)
+                observation, test_reward, done, tr, info = env.step(action)
                 episode_test_reward += test_reward
-                if done:
+                if done or tr:
                     break
         
 
@@ -124,7 +132,7 @@ def run(algo):
                 count
                 )
                 )
-    algo.load()
+    # algo.load()
 
 if __name__ == "__main__":
     try:

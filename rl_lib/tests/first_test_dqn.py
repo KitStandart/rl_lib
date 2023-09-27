@@ -51,6 +51,7 @@ def run(algo):
 
         observation, info = env.reset()
         episode_reward = 0
+        episode_loss = []
         for step in range(1, steps):
             action = algo.get_action(observation)
             new_observation, reward, done, _, info = env.step(action)
@@ -66,7 +67,7 @@ def run(algo):
             if done:
                 break
 
-        # algo.save()       
+        algo.save()       
         rewards.append(episode_reward)
         #testing algoritm perfomans
         if episode%test_frequency == 0:

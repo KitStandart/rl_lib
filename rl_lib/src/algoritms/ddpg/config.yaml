@@ -59,6 +59,9 @@ exploration_config:
     action_space: None
     upper_bound: None
     lower_bound: None
+    dt: 0.01
+    mean: None
+    theta: 0.15
 
 data_saver:
   path: ""
