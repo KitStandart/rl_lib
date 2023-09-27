@@ -9,7 +9,6 @@ import traceback
 
 from rl_lib.src.algoritms.ddpg.ddpg import DDPG
 from rl_lib.src.data_saver.utils import load_default_config
-from rl_lib.src.normalizes import normalize_m1_1
 
 env = gym.make('CarRacing-v2')
 
@@ -17,8 +16,8 @@ initializer = tf.keras.initializers.RandomUniform(minval=-3*1e-4, maxval=3*1e-4,
 
 def create_conv():
     input_layer = layers.Input(shape=env.observation_space.shape, )
-    lambda_layer = layers.Lambda(normalize_m1_1)(input_layer)
-    cov_layer1 = layers.Conv2D(32, 7, 4, activation='relu', kernel_initializer=initializer)(lambda_layer)
+    rescaling_layer = layers.experimental.preprocessing.Rescaling(1.0 / 127.5, offset=-1)(input_layer)
+    cov_layer1 = layers.Conv2D(32, 7, 4, activation='relu', kernel_initializer=initializer)(rescaling_layer)
     cov_layer2 = layers.Conv2D(32, 5, 2,activation='relu', kernel_initializer=initializer)(cov_layer1)
     cov_layer3 = layers.Conv2D(32, 3, 2,activation='relu', kernel_initializer=initializer)(cov_layer2)
     conv_out = layers.Flatten()(cov_layer3)
