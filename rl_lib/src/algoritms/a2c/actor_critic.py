@@ -1,8 +1,9 @@
 import tensorflow as tf
 from tensorflow.keras import layers
-import abc
+from tensorflow.keras.models import clone_model
 
 from rl_lib.src.algoritms.dqn.dqn import DQN_Model
+
 
 class Actor_Model(DQN_Model):
   def __init__(self, config = {},**kwargs):
@@ -48,7 +49,8 @@ class Critic_Model(DQN_Model):
 
           td_error = kwargs['Qtarget'] - Q
           loss = self.loss(kwargs['Qtarget'], Q)*kwargs.get('weights', 1.0)
-      gradients = tape.gradient(loss, self.model.trainable_variables)
+          E_loss = tf.reduce_mean(loss, axis=0)
+      gradients = tape.gradient(E_loss, self.model.trainable_variables)
       loss = tf.reduce_mean(loss, axis=-1)
       return {'gradients': gradients, 'loss': loss, 'td_error': td_error}
     
@@ -103,7 +105,7 @@ class Actor_Critic_Model(DQN_Model):
     return self.update_weights_critic(**kwargs)
   
   def update_weights_actor(self, **kwargs):
-    kwargs['critic_model'] = self.critic_model
+    kwargs['critic_model'] = self.critic_model.model
     loss = self.actor_model.update_weights(**kwargs)
     return {'loss': loss['loss'], 'td_error': loss['td_error']}
 
@@ -122,8 +124,8 @@ class Actor_Critic_Model(DQN_Model):
         'critic': self.critic_model.get_weights()
      }
 
-  def input_spec(self):
-    return self.actor_model.input_spec()
+  def input_spec(self, key=None):
+    return self.actor_model.input_spec(key=key)
   
   def load(self, path):
     self.actor_model.load(path)

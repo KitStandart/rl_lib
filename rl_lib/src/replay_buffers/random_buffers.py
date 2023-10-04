@@ -1,5 +1,6 @@
 import numpy as np
 from ..data_saver.utils import save_data, load_data
+from .dict_array import DictArray
 
 class _n_step_buffer:
     def __init__(self, **kwargs):
@@ -52,8 +53,9 @@ class Random_Buffer:
         self.size = kwargs.get("size", 100000)
         discount_factor = kwargs.get("discount_factor", 0.99)
         num_var = kwargs.get("num_var", 5)
+
         # буфер для хранения перехода     
-        self.data = np.zeros((self.size, num_var), dtype=object)  
+        self.data = DictArray((self.size, num_var), dtype=object)  
         self.name = "Random_Buffer"
         
         # размер буфера
@@ -63,13 +65,13 @@ class Random_Buffer:
         self.n_step_buffer = _n_step_buffer(**kwargs) if n_step > 1 else None
 
     def clear(self, ):
-        self.data = np.zeros(self.data.shape, dtype=object) 
+        self.data = DictArray(self.data.shape, dtype=object) 
         self.count = 0
         self.real_size = 0
         if self.n_step_buffer != None: self.n_step_buffer.clear()
 
     def add(self, samples: tuple, args=None):
-        """Добавляет данные в буфер"""
+        """Добавляет данные в буфер s,a,r,n_s,d"""
         if self.n_step_buffer != None:
           result = self.n_step_buffer.add(samples)
           if result != None:
@@ -82,14 +84,11 @@ class Random_Buffer:
         """Возвращает батч: dict"""
         if np.any(idx) == None:
             idx = self._get_idx( batch_size)
-        state = np.stack(self.data[idx, 0], axis=0).astype(np.float32)
-        action = np.stack(self.data[idx, 1], axis=0).astype(np.float32)
-        reward = self.data[idx, 2].astype(np.float32)
-        done = self.data[idx, 3].astype(np.float32)
-        next_state = np.stack(self.data[idx, 4], axis=0).astype(np.float32)
+        data = self.data[idx]
+        state, action, reward, done, next_state = data[:5]
         other_data = {}
         if 5 < self.data.shape[1] <= 7:
-            other_data = {key: np.stack(self.data[idx, i], axis=0).astype(np.float32) for i, key in zip(range(5,7), ('h_t', 'c_t'))}
+            other_data = {key: data[i] for i, key in zip(range(5,7), ('h_t', 'c_t'))}
 
         return {'state': state, 'action': action, 'reward': reward, 'done': done, 'next_state': next_state, **other_data}
 
@@ -112,7 +111,7 @@ class Random_Buffer:
 
 
     def _add_data(self, samples):
-        self.data[self.count, :] = samples
+        self.data[self.count] = samples
         self.count = (self.count + 1) % self.size
         self.real_size = min(self.size, self.real_size + 1)
         return True     

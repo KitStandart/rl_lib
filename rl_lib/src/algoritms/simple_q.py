@@ -1,5 +1,6 @@
 import tensorflow as tf
 import numpy as np
+from copy import copy
 
 from .base_algo import Base_Algo
 from rl_lib.src.replay_buffers.replay_buffer import ReplayBuffer
@@ -66,7 +67,7 @@ class SimpleQ(Base_Algo, ):
                  experimental_autograph_options = tf.autograph.experimental.Feature.ALL)
   def calculate_target(self, **kwargs):
     Qtarget = self.calculate_new_best_action(**kwargs)
-    dones = tf.ones(kwargs['done'].shape, dtype=tf.dtypes.float32) 
+    dones = tf.ones_like(kwargs['done'], dtype=tf.dtypes.float32) 
     dones = dones - kwargs['done']
     Qtarget = kwargs['reward'] + (self.discount_factor**self.n_step) * Qtarget * dones
     if self.recurrent:
@@ -85,7 +86,7 @@ class SimpleQ(Base_Algo, ):
   
   def _get_action(self, observation: tf.Tensor) -> tf.Tensor:
     """Возвращает ценность дейтсвий Q(s,a) всех действий на основе наблюдения"""
-    return self.sample_action(self.action_model.check_input_shape(observation))
+    return self.sample_action(self.action_model.check_input_shape(copy(observation)))
   
   def get_action(self, observation: tf.Tensor) -> float:
     """Возвращает действие на основе наблюдения с учетом исследования"""
