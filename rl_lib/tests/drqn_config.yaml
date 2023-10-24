@@ -1,4 +1,4 @@
-#default DQN config
+#default DRQN config
 
 model_config:
   model: None
@@ -32,7 +32,7 @@ buffer_config:
   beta: 0.4
   beta_changing: 0.0005
   beta_changing_curve: 'linear'
-  max_priority: 0.01
+  max_priority: 0.1
 
 exploration_config:
   strategy_name: "epsilon_greedy"

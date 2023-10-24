@@ -1,56 +1,75 @@
+import os.path as os_path
+import time
+import traceback
+from pprint import pprint
+
 import gym
 import numpy as np
-import time
-import os.path as os_path
-from tensorflow.keras import layers
 import tensorflow as tf
-from pprint import pprint
-import traceback
+from tensorflow.keras import layers
 
-from rl_lib.src.algoritms.ddpg.ddpg import DDPG
+from rl_lib.src.algoritms.model_free.continuous_control.ddpg import DDPG
 from rl_lib.src.data_saver.utils import load_default_config
 
-env = gym.make('CarRacing-v2')
+env = gym.make('Walker2d-v4')
 
-initializer = tf.keras.initializers.RandomUniform(minval=-3*1e-4, maxval=3*1e-4, seed=40)
+initializer = tf.keras.initializers.RandomUniform(
+    minval=-3*1e-4, maxval=3*1e-4, seed=40)
+
 
 def create_conv():
     input_layer = layers.Input(shape=env.observation_space.shape, )
-    rescaling_layer = layers.experimental.preprocessing.Rescaling(1.0 / 127.5, offset=-1)(input_layer)
-    cov_layer1 = layers.Conv2D(32, 7, 4, activation='relu', kernel_initializer=initializer)(rescaling_layer)
-    cov_layer2 = layers.Conv2D(32, 5, 2,activation='relu', kernel_initializer=initializer)(cov_layer1)
-    cov_layer3 = layers.Conv2D(32, 3, 2,activation='relu', kernel_initializer=initializer)(cov_layer2)
+    rescaling_layer = layers.experimental.preprocessing.Rescaling(
+        1.0 / 127.5, offset=-1)(input_layer)
+    cov_layer1 = layers.Conv2D(
+        32, 7, 4, activation='relu', kernel_initializer=initializer)(rescaling_layer)
+    cov_layer2 = layers.Conv2D(
+        32, 5, 2, activation='relu', kernel_initializer=initializer)(cov_layer1)
+    cov_layer3 = layers.Conv2D(
+        32, 3, 2, activation='relu', kernel_initializer=initializer)(cov_layer2)
     conv_out = layers.Flatten()(cov_layer3)
-    return tf.keras.Model(inputs=input_layer, outputs=conv_out)  
+    return tf.keras.Model(inputs=input_layer, outputs=conv_out)
+
 
 def create_model():
     """Создает модель tf.keras.Model, архитектура DQN"""
     input_layer = layers.Input(shape=env.observation_space.shape, )
-    conv_out = create_conv()(input_layer)
-    dence_layer1 = layers.Dense(256, activation='relu', kernel_initializer=initializer)(conv_out)
-    dence_layer2 = layers.Dense(256, activation='relu', kernel_initializer=initializer)(dence_layer1)
-    dence_out = layers.Dense(env.action_space.shape[0], activation='tanh', kernel_initializer=initializer)(dence_layer2)
+    # conv_out = create_conv()(input_layer)
+    dence_layer1 = layers.Dense(
+        256, activation='relu', kernel_initializer=initializer)(input_layer)
+    dence_layer2 = layers.Dense(
+        256, activation='relu', kernel_initializer=initializer)(dence_layer1)
+    dence_out = layers.Dense(
+        env.action_space.shape[0], activation='tanh', kernel_initializer=initializer)(dence_layer2)
 
-    dence_out = dence_out*tf.reduce_max((tf.abs(env.action_space.low), env.action_space.high))
-    
+    dence_out = dence_out * \
+        tf.reduce_max((tf.abs(env.action_space.low), env.action_space.high))
+
     return tf.keras.Model(inputs=input_layer, outputs=dence_out)
+
 
 def create_critic_model():
     """Создает модель tf.keras.Model, архитектура DQN, начальные слои - сверточные"""
     input_layer = layers.Input(shape=env.observation_space.shape, )
-    obsv_layer = layers.Dense(128, activation='relu', kernel_initializer=initializer)(input_layer)
-    obsv_layer = layers.Dense(64, activation='relu', kernel_initializer=initializer)(obsv_layer)
+    obsv_layer = layers.Dense(128, activation='relu',
+                              kernel_initializer=initializer)(input_layer)
+    obsv_layer = layers.Dense(64, activation='relu',
+                              kernel_initializer=initializer)(obsv_layer)
     input_action_layer = layers.Input(shape=env.action_space.shape, )
-    action_layer = layers.Dense(32, activation='relu', kernel_initializer=initializer)(input_action_layer)
-    
-    conv_out = create_conv()(input_layer)
-    concat = layers.Concatenate()((conv_out, action_layer))
+    action_layer = layers.Dense(
+        32, activation='relu', kernel_initializer=initializer)(input_action_layer)
+
+    # conv_out = create_conv()(input_layer)
+    concat = layers.Concatenate()((obsv_layer, action_layer))
     flatten = layers.Flatten()(concat)
-    dence_layer1 = layers.Dense(256, activation='relu', kernel_initializer=initializer)(flatten)
-    dence_layer2 = layers.Dense(256, activation='relu', kernel_initializer=initializer)(dence_layer1)
+    dence_layer1 = layers.Dense(
+        256, activation='relu', kernel_initializer=initializer)(flatten)
+    dence_layer2 = layers.Dense(
+        256, activation='relu', kernel_initializer=initializer)(dence_layer1)
     dence_out = layers.Dense(1, activation=None)(dence_layer2)
-    
-    return tf.keras.Model(inputs=[input_layer, input_action_layer], outputs=dence_out)   
+
+    return tf.keras.Model(inputs=[input_layer, input_action_layer], outputs=dence_out)
+
 
 config = load_default_config(__file__)
 
@@ -67,6 +86,7 @@ algo = DDPG(config)
 # algo.load()
 pprint(algo.config)
 
+
 def run(algo):
     epidodes = 250
     steps = 250
@@ -77,7 +97,7 @@ def run(algo):
     pre_train_steps = 1
     copy_weigths_frequency = 1
 
-    #history data
+    # history data
     rewards = []
     episode_reward = 0
     episode_test_reward = 0
@@ -90,7 +110,7 @@ def run(algo):
         observation, info = env.reset()
         episode_reward = 0
         episode_loss = []
-        for step in range(1, steps+1):
+        while True:  # for step in range(1, steps+1):
             action = algo.get_action(observation)
             new_observation, reward, done, tr, info = env.step(action)
             algo.add((observation, action, reward, done, new_observation))
@@ -105,39 +125,40 @@ def run(algo):
             if done or tr:
                 break
 
-        if episode % save_frequency == 0: algo.save()       
+        if episode % save_frequency == 0:
+            algo.save()
         rewards.append(episode_reward)
-        #testing algoritm perfomans
-        if episode%test_frequency == 0:
+        # testing algoritm perfomans
+        if episode % test_frequency == 0:
             observation, info = env.reset()
             episode_test_reward = 0
-            for test_step in range(1, test_steps+1):
+            while True:  # for test_step in range(1, test_steps+1):
                 action = algo.get_test_action(observation)
                 observation, test_reward, done, tr, info = env.step(action)
                 episode_test_reward += test_reward
                 if done or tr:
                     break
-        
 
-        #print info
+        # print info
         print("   Episode %d - Reward = %.3f, episode reward = %.3f, test reward %.3f, Loss = %.6f, Time = %.f sec, Total steps = %.f" %
-                (
-                episode,
-                np.asarray(rewards[-10:]).mean() if len(rewards) != 0 else 0,
-                episode_reward,
-                episode_test_reward,
-                np.asarray(episode_loss).mean() if len(episode_loss) != 0 else 0,
-                time.time()-start_time,
-                count
-                )
-                )
+              (
+                  episode,
+                  np.asarray(rewards[-10:]).mean() if len(rewards) != 0 else 0,
+                  episode_reward,
+                  episode_test_reward,
+                  np.asarray(episode_loss).mean() if len(
+                      episode_loss) != 0 else 0,
+                  time.time()-start_time,
+                  count
+              )
+              )
     # algo.load()
+
 
 if __name__ == "__main__":
     try:
         run(algo=algo)
-    
+
     except Exception:
         print(traceback.format_exc())
         input("Press enter to exit: ")
-

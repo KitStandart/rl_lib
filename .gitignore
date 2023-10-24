@@ -8,3 +8,7 @@ rl_lib/tests/models/
 
 #jupiter notebooks
 *.ipynb
+
+
+.vscode
+requirements.txt

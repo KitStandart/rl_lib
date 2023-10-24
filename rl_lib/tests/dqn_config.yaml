@@ -9,7 +9,7 @@ model_config:
   n_step: 1
   batch_size: 32
   double_network: False
-  priority: False
+  priority: True
   tau: 1.0
   
 optimizer_config:
