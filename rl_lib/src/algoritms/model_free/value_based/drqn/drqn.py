@@ -124,8 +124,8 @@ class DRQN(SimpleQ):
         self.initial_state()
         self.recurrent_skip = self.config['buffer_config']['recurrent_skip']
         self.trace_length = self.config['buffer_config']['trace_length']
-        self.recurrent = True
-        self.batch_dims = 2
+        self.RECURRENT = True
+        self.BATCH_DIMS = 2
 
     def add(self, data: tuple, priority=None) -> None:
         """

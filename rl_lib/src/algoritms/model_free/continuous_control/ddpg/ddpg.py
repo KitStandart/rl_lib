@@ -43,7 +43,7 @@ class DDPG(SimpleQ):
     def _train_step(self, **batch) -> dict:
         """Вспомогательная train_step"""
         batch = self.choice_model_for_double_calculates(**batch)
-        batch['batch_dims'] = self.batch_dims
+        batch['batch_dims'] = self.BATCH_DIMS
         if self.priority:
             batch['weights'] = tf.expand_dims(batch['weights'], -1)
         if batch['p_double'] > 0.5:

@@ -33,9 +33,9 @@ class SimpleQ(Base_Algo, ):
         self.priority = self.config['model_config'].get("priority")
         self.tau = self.config['model_config'].get("tau")
 
-        self.recurrent = False
-        self.batch_dims = 1
-        self.ind_axis = -1
+        self.RECURRENT = False
+        self.BATCH_DIMS = 1
+        self.IND_AXIS = -1
 
     def add(self, data: tuple, priority=None) -> None:
         """
@@ -82,9 +82,10 @@ class SimpleQ(Base_Algo, ):
         Qtarget = self.calculate_new_best_action(**kwargs)
         dones = tf.ones_like(kwargs['done'], dtype=tf.dtypes.float32)
         dones = dones - kwargs['done']
-        Qtarget = kwargs['reward'] + \
-            (self.discount_factor**self.n_step) * Qtarget * dones
-        if self.recurrent:
+        Qtarget = self._expand_dims_like(kwargs['reward'], Qtarget) + \
+            (self.discount_factor**self.n_step) * Qtarget * \
+            self._expand_dims_like(dones, Qtarget)
+        if self.RECURRENT:
             Qtarget = Qtarget[:, kwargs.get('recurrent_skip', 10):]
         return Qtarget
 
@@ -135,20 +136,20 @@ class SimpleQ(Base_Algo, ):
 
     def get_batch_and_td_error(self):
         batch = self.get_batch()
-        batch['batch_dims'] = self.batch_dims
+        batch['batch_dims'] = self.BATCH_DIMS
         batch['p_double'] = 1.
         td_error = self.calculate_gradients(batch)['td_error']
         return {'td_error': td_error.numpy(), 'batch': batch}
 
-    def get_best_action(self, Qaction, Qtarget):
-        ind = tf.argmax(Qaction, axis=self.ind_axis)
-        Qtarget = tf.gather(Qtarget, ind, batch_dims=self.batch_dims)
+    def get_best_action(self, Qaction: tf.Tensor, Qtarget: tf.Tensor):
+        ind = tf.argmax(Qaction, axis=self.IND_AXIS)
+        Qtarget = tf.gather(Qtarget, ind, batch_dims=self.BATCH_DIMS)
         return Qtarget
 
     def get_gradients(self) -> tf.Tensor:
         """Вычисляет градиенты и возвращает их"""
         batch = self.get_batch()
-        batch['batch_dims'] = self.batch_dims
+        batch['batch_dims'] = self.BATCH_DIMS
         batch['p_double'] = 1.
         return self.calculate_gradients(batch)['gradients']
 
@@ -168,7 +169,7 @@ class SimpleQ(Base_Algo, ):
     def _train_step(self, **batch) -> dict:
         """Вспомогательная train_step"""
         batch = self.choice_model_for_double_calculates(**batch)
-        batch['batch_dims'] = self.batch_dims
+        batch['batch_dims'] = self.BATCH_DIMS
         return (self.action_model.update_weights(**batch)
                 if batch['p_double'] > 0.5
                 else self.target_model.update_weights(**batch))
@@ -185,7 +186,7 @@ class SimpleQ(Base_Algo, ):
         if self.priority:
             self.buffer.update_priorities(
                 batch['data_idxs'], loss
-                if not self.recurrent
+                if not self.RECURRENT
                 else loss[:, -1])
         if self.tau != 1:
             _ = self.copy_weights()

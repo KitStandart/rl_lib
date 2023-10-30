@@ -107,6 +107,14 @@ class Base_Algo(Saver, abc.ABC):
             self.action_model.weights, self.target_model.weights, self.tau)
         return res
 
+    def _expand_dims_like(self, tensor: tf.Tensor,
+                          tensor_like: tf.Tensor) -> tf.Tensor:
+        len_tensor_like_shape = len(tensor_like.shape)
+        
+        while len(tensor.shape) < len_tensor_like_shape:
+            tensor = tf.expand_dims(tensor, axis=-1)
+        return tensor
+    
     @tf.function(reduce_retracing=True,
                  jit_compile=True,
                  experimental_autograph_options=tf.autograph.experimental.Feature.ALL)

@@ -28,12 +28,13 @@ RL_Lib - это мощный и гибкий инструмент для обу�
     <li>DQN и его модификации</li>
     <li>DRQN</li>
     <li>DDPG</li>
+    <li>QR_DQN</li>
 </ul>
 
 ## Базовое использование
 #### Создание алгоритма по умолчанию (конфиг можно посмотреть в папке алгоритма):
 ```
-from rl_lib.src.algoritms.dqn.dqn import DQN
+from rl_lib import DQN
 
 config = {'model_config':{}}
 config['model_config']['input_shape'] = env.observation_space.shape
@@ -42,25 +43,40 @@ config['model_config']['action_space'] = env.action_space.n
 algo = DQN(config)
 ```
 
-#### Создание алгоритма пользовательского алгоритма:
+#### Загрузка пользовательской конфигурации алгоритма:
 ```
-from rl_lib.src.algoritms.dqn.dqn import DQN
-from yaml import safe_load
+from rl_lib import DQN
+from rl_lib import load_default_config
 
-path = #путь к файлу конфигурации
+path = #путь к файлу конфигурации, должен оканчиваться на .yaml
 
-config = safe_load(
-            open(
-                os_path.join(
-                        os_path.dirname(path),"./config.yaml"
-                            ),
-                "rb")
-                )
+config = load_default_config(path)
 config['model_config']['input_shape'] = env.observation_space.shape
 config['model_config']['action_space'] = env.action_space.n
 
 algo = DQN(config)
 ```
+
+#### Верхнеуровневое API для обучения алгоритма:
+```
+from rl_lib import DQN
+from rl_lib import load_default_config
+from rl_lib import Base_Env_Runner
+
+path = #путь к файлу конфигурации, должен оканчиваться на .yaml
+
+config = load_default_config(path)
+config['model_config']['input_shape'] = env.observation_space.shape
+config['model_config']['action_space'] = env.action_space.n
+algo = DQN(config)
+
+runner = Base_Env_Runner(env=env,
+                         algo=algo,
+                         ...)
+
+runner.run()
+```
+
 ## Основные методы алгоритма
 #### Сохранение и загрузка сохраненного алгоритма:
 ```
@@ -110,7 +126,6 @@ algo.initial_state()
 <ul type="disk">
     <li>Реализация алгоритмов:
     <ul>
-        <li>QR-DQN</li>
         <li>IQN</li>
         <li>A2C</li>
         <li>TD3</li>
@@ -118,6 +133,6 @@ algo.initial_state()
         <li>RD2D</li>
         <li>Bandits</li>
     </ul>
-    <li>Добавление LaziFrames в буферы сохранения</li>
+    <li>Добавление LazyFrames в буферы сохранения</li>
     <li>Написание обертки шагов обучения в среде</li>
     <li>Реализация записи статистики обучения</li>

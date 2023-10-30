@@ -7,7 +7,7 @@ import tensorflow as tf
 from pprint import pprint
 import traceback
 
-from rl_lib.src.algoritms.ddpg.ddpg import DDPG
+from rl_lib import DDPG
 from rl_lib.src.data_saver.utils import load_default_config
 
 env = gym.make('CarRacing-v2')

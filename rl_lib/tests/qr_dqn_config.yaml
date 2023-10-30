@@ -1,32 +1,30 @@
-#default DRQN config
+#default QR_DQN config
 
 model_config:
   model: None
-  name: "dedault_DRQN"
+  name: "default_QR_DQN"
   input_shape: None
   action_space: None
-  lstm_size: 64
   discount_factor : 0.99
   n_step: 1
   batch_size: 32
   double_network: False
   priority: False
   tau: 1.0
+  num_atoms: 4
+  hubber_k: 1.0
   
 optimizer_config:
   optimizer_name: "adam"
   optimizer_params:
-    learning_rate: 0.0001
+    learning_rate: 0.01
     epsilon: 0.001
     clipnorm: 1.0
   custom_optimizer: None
 
 buffer_config:
-  size: 100000
+  size: 10000
   priority: False
-  recurrent: True
-  trace_length: 15
-  recurrent_skip: 5
   n_step: None
   discount_factor : None
   eps: None
@@ -39,9 +37,9 @@ buffer_config:
 exploration_config:
   strategy_name: "epsilon_greedy"
   strategy_config:
-    eps_decay_steps: 100000
+    eps_decay_steps: 5000
     eps_max: 1.0
-    eps_min: 0.1
+    eps_min: 0.01
     eps_test: 0.001
     action_space: None
 

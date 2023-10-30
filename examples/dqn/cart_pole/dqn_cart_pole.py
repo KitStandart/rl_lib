@@ -6,7 +6,7 @@ from tensorflow.keras import layers
 import tensorflow as tf
 from pprint import pprint
 
-from rl_lib.src.algoritms.dqn.dqn import DQN
+from rl_lib import DQN
 from rl_lib.src.data_saver.utils import load_default_config
 
 env = gym.make('CartPole-v0')

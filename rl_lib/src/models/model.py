@@ -27,7 +27,6 @@ class Model(ModelNN, ModelIO, BaseModel, abc.ABC):
 
     def check_input_shape(self, inputs, key=None):
         if not isinstance(inputs, (tf.Tensor, np.ndarray)):
-            print(inputs)
             for key, inpt in inputs.items() if isinstance(inputs, dict) else enumerate(inputs):
                 inputs[key] = self.check_input_shape(inpt, key=key)
             return inputs

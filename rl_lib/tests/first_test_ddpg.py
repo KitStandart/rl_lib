@@ -8,7 +8,7 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.keras import layers
 
-from rl_lib.src.algoritms.model_free.continuous_control.ddpg import DDPG
+from rl_lib import DDPG
 from rl_lib.src.data_saver.utils import load_default_config
 
 env = gym.make('Walker2d-v4')

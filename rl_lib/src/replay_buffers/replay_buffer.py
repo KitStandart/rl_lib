@@ -1,6 +1,8 @@
-from .priority_buffers import (Prioritized_Replay_Recurrent_Buffer,
-                               Prioritized_Replay_Buffer)
-from .random_buffers import Random_Recurrent_Buffer, Random_Buffer
+import threading
+
+from .priority_buffers import (Prioritized_Replay_Buffer,
+                               Prioritized_Replay_Recurrent_Buffer)
+from .random_buffers import Random_Buffer, Random_Recurrent_Buffer
 
 
 class ReplayBuffer:
@@ -36,9 +38,10 @@ class ReplayBuffer:
                 self.buffer = Random_Recurrent_Buffer(**kwargs)
             else:
                 self.buffer = Random_Buffer(**kwargs)
+        self.lock = threading.Lock()
 
     def add(self, *args):
-        self.buffer.add(*args)
+        with self.lock: self.buffer.add(*args)
 
     @property
     def config(self):
@@ -56,13 +59,13 @@ class ReplayBuffer:
 
     @property
     def real_size(self):
-        return self.buffer.real_size
+        with self.lock: return self.buffer.real_size
 
     def sample(self, *args):
-        return self.buffer.sample(*args)
+        with self.lock: return self.buffer.sample(*args)
 
     def save(self, *args):
         self.buffer.save(*args)
 
     def update_priorities(self, *args):
-        self.buffer.update_priorities(*args)
+        with self.lock: self.buffer.update_priorities(*args)
