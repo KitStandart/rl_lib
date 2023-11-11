@@ -64,11 +64,18 @@ class Random_Buffer:
         self.size = kwargs.get("size", 100000)
         # discount_factor = kwargs.get("discount_factor", 0.99)
         num_var = kwargs.get("num_var", 5)
+        self.hash_table = kwargs.get("var_names",
+                                     {"state": 0,
+                                      "action": 1,
+                                      "reward": 2,
+                                      "done": 3,
+                                      "next_state": 4}
+                                     )
 
         # буфер для хранения перехода
         self.data = DictArray((self.size, num_var), dtype=object)
         self.name = "Random_Buffer"
-
+ 
         # размер буфера
         self.count = 0
         self.real_size = 0
@@ -83,7 +90,9 @@ class Random_Buffer:
             self.n_step_buffer.clear()
 
     def add(self, samples: tuple, args=None):
-        """Добавляет данные в буфер s,a,r,n_s,d"""
+        """Добавляет данные в буфер s,a,r,n_s,d,
+        индексы данных должны быть равны индексам в hash_table.
+        Автоматической проверки нет"""
         if self.n_step_buffer is not None:
             result = self.n_step_buffer.add(samples)
             if result is not None:
@@ -97,19 +106,8 @@ class Random_Buffer:
         if np.any(idx) is None:
             idx = self._get_idx(batch_size)
         data = self.data[idx]
-        state, action, reward, done, next_state = data[:5]
-        other_data = {}
-
-        if 5 < self.data.shape[1] <= 7:
-            other_data = {key: data[i][:, :2]
-                          for i, key in zip(range(5, 7), ('h_t', 'c_t'))}
-
-        return {'state': state,
-                'action': action,
-                'reward': reward,
-                'done': done,
-                'next_state': next_state,
-                **other_data}
+        return {key: data[val]
+                for key, val in self.hash_table.items()}
 
     def save(self, path):
         path += self.name
@@ -151,16 +149,23 @@ class Random_Recurrent_Buffer(Random_Buffer):
 
     def __init__(self, **kwargs):
         kwargs["num_var"] = 7
+        kwargs["var_names"] = {"state": 0,
+                               "action": 1,
+                               "reward": 2,
+                               "done": 3,
+                               "next_state": 4,
+                               "h_t": 5,
+                               "c_t": 6}
         Random_Buffer.__init__(self, **kwargs)
         self.name = "Random_Recurrent_Buffer"
         self.trace_length = kwargs.get("trace_length", 10)
-    
+
     def _make_linspace(self, idx):
         idx = np.linspace(start=idx - self.trace_length,
                         stop=idx, num=self.trace_length+1,
                         dtype=int, axis=1)[:, :-1]
         return idx
-    
+
     def _get_idx(self, batch_size, *args, **kwargs):
         if self.real_size != self.size:
             return self._make_linspace(np.random.randint(low=self.trace_length,
@@ -170,7 +175,7 @@ class Random_Recurrent_Buffer(Random_Buffer):
                 low=-self.size + self.count + self.trace_length,
                 high=self.count, size=(batch_size,)
                 ))
-    
+
     def sample(self, batch_size, idx=None):
         if idx is not None:
             idx = self._make_linspace(idx)

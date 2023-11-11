@@ -155,12 +155,8 @@ class DRQN(SimpleQ):
 
     def get_batch(self, ):
         batch = super().get_batch()
-
-        new_h_t, new_c_t = tf.squeeze(batch['h_t'][:, 1:], axis=1), tf.squeeze(
-            batch['c_t'][:, 1:], axis=1)
-        h_t, c_t = tf.squeeze(
-            batch['h_t'][:, :-1], axis=1), tf.squeeze(batch['c_t'][:, :-1],
-                                                      axis=1)
+        new_h_t, new_c_t = batch['h_t'][:, 1], batch['c_t'][:, 1]
+        h_t, c_t = batch['h_t'][:, 0], batch['c_t'][:, 0]
         batch['state'] = [batch['state'], h_t, c_t]
         batch['next_state'] = [batch['next_state'], new_h_t, new_c_t]
         batch['recurrent_skip'] = self.recurrent_skip

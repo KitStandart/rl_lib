@@ -1,15 +1,87 @@
+import abc
 import tensorflow as tf
 from tensorflow.keras import layers
 
+from rl_lib.src.models.model import Model
 from rl_lib.src.algoritms.model_free.value_based import DQN_Model
 
 
-class Actor_Model(DQN_Model):
-    def __init__(self, config={}, **kwargs):
+class _abc_Actor_Model(Model):
+    def __init__(self, config: dict = {}, **kwargs):
         config['model_config'] = config['actor_model_config']['model_config']
         config['optimizer_config'] = config['actor_optimizer_config']['optimizer_config']
         super().__init__(config=config, **kwargs)
         self.name = kwargs.get('name', 'error_name') + '_actor_'
+
+
+class _abc_Critric_Model(Model):
+    def __init__(self, config={}, **kwargs):
+        config['model_config'] = config['critic_model_config']['model_config']
+        config['optimizer_config'] = config['critic_optimizer_config']['optimizer_config']
+        super().__init__(config=config, **kwargs)
+        self.name = kwargs.get('name', 'error_name') + '_critic_'
+
+
+class _abc_Actor_Critic_Model(Model):
+    def __init__(self, actor_model: object = None, critic_model: object = None,
+                 config: dict = {}, **kwargs):
+        config['actor_model_config']['model_config']['name'] = config['model_config']['name']
+        config['actor_model_config']['model_config']['input_shape'] = config['model_config']['input_shape']
+        config['actor_model_config']['model_config']['action_space'] = config['model_config']['action_space']
+
+        config['critic_model_config']['model_config']['name'] = config['model_config']['name']
+        config['critic_model_config']['model_config']['input_shape'] = config['model_config']['input_shape']
+        config['critic_model_config']['model_config']['action_space'] = config['model_config']['action_space']
+        self.actor_model = actor_model(config=config, **kwargs)
+        self.critic_model = critic_model(config=config, **kwargs)
+
+    @abc.abstractmethod
+    def calculate_gradients(self, **kwargs) -> dict:
+        "Функция кастомного вычисления градиентов"
+
+    def update_weights(self, **kwargs):
+        _ = self.update_weights_actor(**kwargs)
+        return self.update_weights_critic(**kwargs)
+
+    def update_weights_actor(self, **kwargs):
+        kwargs['critic_model'] = self.critic_model.model
+        loss = self.actor_model.update_weights(**kwargs)
+        return {'loss': loss['loss'], 'td_error': loss['td_error']}
+
+    def update_weights_critic(self, **kwargs) -> dict:
+        loss = self.critic_model.update_weights(**kwargs)
+        return {'loss': loss['loss'], 'td_error': loss['td_error']}
+
+    def get_weights(self, ) -> dict:
+        return {
+            'actor': self.actor_model.get_weights(),
+            'critic': self.critic_model.get_weights()
+        }
+
+    def input_spec(self, key=None):
+        return self.actor_model.input_spec(key=key)
+
+    def load(self, path):
+        self.actor_model.load(path)
+        self.critic_model.load(path)
+
+    def save(self, path):
+        self.actor_model.save(path)
+        self.critic_model.save(path)
+
+    def set_weights(self, weights: dict) -> None:
+        self.actor_model.set_weights(weights=weights['actor'])
+        self.critic_model.set_weights(weights=weights['critic'])
+
+    @property
+    def summary(self):
+        self.actor_model.summary
+        self.critic_model.summary
+
+
+class Actor_Model(_abc_Actor_Model, DQN_Model):
+    def __init__(self, config={}, **kwargs):
+        super().__init__(config=config, **kwargs)
 
     def _prediction_processing(self, inputs: tf.Tensor, **kwargs):
         return kwargs['critic_model']([kwargs['state'], inputs])
@@ -19,12 +91,9 @@ class Actor_Model(DQN_Model):
         return tf.reduce_mean(predict, axis=0) * (-1)
 
 
-class Critic_Model(DQN_Model):
+class Critic_Model(_abc_Critric_Model, DQN_Model):
     def __init__(self, config={}, **kwargs):
-        config['model_config'] = config['critic_model_config']['model_config']
-        config['optimizer_config'] = config['critic_optimizer_config']['optimizer_config']
         super().__init__(config=config, **kwargs)
-        self.name = kwargs.get('name', 'error_name') + '_critic_'
 
     def _prediction_processing(self, inputs: tf.Tensor, **kwargs):
         return inputs
@@ -95,61 +164,17 @@ class Critic_Model(DQN_Model):
             )
 
 
-class Actor_Critic_Model(DQN_Model):
+class Actor_Critic_Model(_abc_Actor_Critic_Model, DQN_Model):
     def __init__(self, config={}, **kwargs):
-        config['actor_model_config']['model_config']['name'] = config['model_config']['name']
-        config['actor_model_config']['model_config']['input_shape'] = config['model_config']['input_shape']
-        config['actor_model_config']['model_config']['action_space'] = config['model_config']['action_space']
-
-        config['critic_model_config']['model_config']['name'] = config['model_config']['name']
-        config['critic_model_config']['model_config']['input_shape'] = config['model_config']['input_shape']
-        config['critic_model_config']['model_config']['action_space'] = config['model_config']['action_space']
-        self.actor_model = Actor_Model(config=config, **kwargs)
-        self.critic_model = Critic_Model(config=config, **kwargs)
+        super().__init__(actor_model=Actor_Model,
+                         critic_model=Critic_Model,
+                         config=config,
+                         **kwargs)
 
     def __call__(self, input: tf.Tensor) -> tf.Tensor:
         return self.critic_model([input, self.actor_model(input)])
-
-    def update_weights(self, **kwargs):
-        _ = self.update_weights_actor(**kwargs)
-        return self.update_weights_critic(**kwargs)
-
-    def update_weights_actor(self, **kwargs):
-        kwargs['critic_model'] = self.critic_model.model
-        loss = self.actor_model.update_weights(**kwargs)
-        return {'loss': loss['loss'], 'td_error': loss['td_error']}
-
-    def update_weights_critic(self, **kwargs) -> dict:
-        loss = self.critic_model.update_weights(**kwargs)
-        return {'loss': loss['loss'], 'td_error': loss['td_error']}
 
     def calculate_gradients(self, **kwargs) -> dict:
         kwargs['action'] = self.actor_model(kwargs['next_state'])
         gradients = self.critic_model.calculate_gradients(**kwargs)
         return gradients
-
-    def get_weights(self, ) -> dict:
-        return {
-            'actor': self.actor_model.get_weights(),
-            'critic': self.critic_model.get_weights()
-        }
-
-    def input_spec(self, key=None):
-        return self.actor_model.input_spec(key=key)
-
-    def load(self, path):
-        self.actor_model.load(path)
-        self.critic_model.load(path)
-
-    def save(self, path):
-        self.actor_model.save(path)
-        self.critic_model.save(path)
-
-    def set_weights(self, weights: dict) -> None:
-        self.actor_model.set_weights(weights=weights['actor'])
-        self.critic_model.set_weights(weights=weights['critic'])
-
-    @property
-    def summary(self):
-        self.actor_model.summary
-        self.critic_model.summary

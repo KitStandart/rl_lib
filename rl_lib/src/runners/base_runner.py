@@ -11,17 +11,17 @@ class Abc_Base_Env_Runner(abc.ABC):
         self.env = env
         self.algo = algo
 
-    @abc.abstractclassmethod
+    @abc.abstractmethod
     def _run():
         "Основная логика обучения"
         pass
 
-    @abc.abstractclassmethod
+    @abc.abstractmethod
     def train():
         "Запускает обучения алгоритма в среде"
         pass
 
-    @abc.abstractclassmethod
+    @abc.abstractmethod
     def test():
         "Запускает тестирование алгоритма в среде"
         pass

@@ -7,8 +7,8 @@ model_config:
   action_space: None
   lstm_size: 64
   discount_factor : 0.9
-  n_step: 3
-  priority: True
+  n_step: 1
+  priority: False
   batch_size: 32
   double_network: False
   tau: 1.0
@@ -22,7 +22,7 @@ optimizer_config:
   custom_optimizer: None
 
 buffer_config:
-  size: 100000
+  size: 10000
   priority: True
   recurrent: True
   trace_length: 10

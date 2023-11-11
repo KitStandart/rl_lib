@@ -46,7 +46,7 @@ def run(algo):
     train_frequency = 1
     test_frequency = 10
     test_steps = 200
-    pre_train_steps = 500   
+    pre_train_steps = 2500   
     copy_weigths_frequency = 100
 
     # history data
