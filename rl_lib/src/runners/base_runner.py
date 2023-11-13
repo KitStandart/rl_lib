@@ -51,12 +51,14 @@ def run_episode(func):
         observation, _ = self.env.reset()
         self.algo.initial_state()
         episode_reward = 0
+        other_info = []
         for env_step in range(1, kwargs.get("steps")):
-            env_step_result, other_info = func(self, observation)
+            env_step_result, _other_info = func(self, observation)
             observation, reward, done = env_step_result[:3]
             if self.new_step_api:
                 tr = env_step_result[3]
             episode_reward += reward
+            if _other_info: other_info.append(_other_info)
             if done or tr:
                 break
         return episode_reward, other_info
@@ -193,7 +195,7 @@ class Base_Env_Runner(Abc_Base_Env_Runner):
                 self.save()
             all_rewards.append(episode_reward)
             if td_error:
-                all_td_error.append(td_error)
+                all_td_error.extend(td_error)
             self._print_info(
                 episode=episode,
                 all_rewards=all_rewards,
